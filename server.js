@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://juhi:Unknown123@jarvis-lifafa.tqkwwey.mongodb.net/?retryWrites=true&w=majority&appName=Jarvis-Lifafa";
 
 mongoose.set('bufferCommands', true);
-mongoose.set('bufferTimeoutMS', 3000);
+mongoose.set('bufferTimeoutMS', 60000);
 
 let isConnected = false;
 
@@ -24,20 +24,16 @@ async function connectDB() {
   try {
     if(mongoose.connection.readyState === 0) {
       await mongoose.connect(MONGO_URI, {
-        serverSelectionTimeoutMS: 3000,
-        socketTimeoutMS:          3000,
-        connectTimeoutMS:         3000,
+        serverSelectionTimeoutMS: 60000,
+        socketTimeoutMS:          60000,
+        connectTimeoutMS:         60000,
         maxPoolSize:              10,
         minPoolSize:              1,
         retryWrites:              true,
-        retryReads:               true,
-        tls: true,
-        tlsAllowInvalidCertificates: true,
-        tlsAllowInvalidHostnames: true,
       });
     } else {
       await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('Connection timeout')), 3000);
+        const timeout = setTimeout(() => reject(new Error('Connection timeout')), 30000);
         mongoose.connection.once('connected', () => { clearTimeout(timeout); resolve(); });
         mongoose.connection.once('error', (err) => { clearTimeout(timeout); reject(err); });
       });
