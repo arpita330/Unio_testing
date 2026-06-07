@@ -10,7 +10,7 @@
 const router   = require('express').Router();
 const mongoose = require('mongoose');
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || '8435';
+const ADMIN_SECRET = process.env.ADMIN_SECRET || '2486';
 
 // ── Admin Auth ────────────────────────────────────────────────────────────────
 function adminAuth(req, res, next) {
