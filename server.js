@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ── MongoDB ───────────────────────────────────────────────────────────────────
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://juhi:Unknown%40123@jarvis-lifafa.tqkwwey.mongodb.net/?retryWrites=true&w=majority&appName=Jarvis-Lifafa";
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://juhi:Unknown123@jarvis-lifafa.tqkwwey.mongodb.net/?retryWrites=true&w=majority&appName=Jarvis-Lifafa";
 
 mongoose.set('bufferCommands', true);
 mongoose.set('bufferTimeoutMS', 3000);
