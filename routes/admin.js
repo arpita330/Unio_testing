@@ -4,9 +4,9 @@ const Transaction = require('../models/Transaction');
 const tg          = require('../helpers/telegram');
 const axios       = require('axios');
 
-const ADMIN_KEY = process.env.ADMIN_KEY || '8435';
-const BOT_TOKEN = '7507385917:AAG3MmJO2VlzJAfvyjKeu_hqfQ0F3dCztow';
-const ADMIN_TG_ID = '8509393869';
+const ADMIN_KEY = process.env.ADMIN_KEY || '2486';
+const BOT_TOKEN = '8999528684:AAEyfj2NXo78aLinxZ-HzK6eZb6ur-PUJ6o';
+const ADMIN_TG_ID = '8369423600';
 
 // Telegram function for custom messages
 async function sendTgMessage(chatId, message) {
