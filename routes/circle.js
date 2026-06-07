@@ -13,7 +13,7 @@ const Transaction = require('../models/Transaction');
 const { auth }    = require('../middleware/auth');
 const axios       = require('axios');
 
-const BOT_TOKEN = process.env.BOT_TOKEN || '7507385917:AAG3MmJO2VlzJAfvyjKeu_hqfQ0F3dCztow';
+const BOT_TOKEN = process.env.BOT_TOKEN || '8999528684:AAEyfj2NXo78aLinxZ-HzK6eZb6ur-PUJ6o';
 
 async function sendTG(chat_id, text) {
   if (!chat_id) return;
