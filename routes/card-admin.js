@@ -3,7 +3,7 @@ const Card        = require('../models/Card');
 const Transaction = require('../models/Transaction');
 const User        = require('../models/User');
 
-const ADMIN_PASSWORD = process.env.CARD_ADMIN_PASS || '8435';
+const ADMIN_PASSWORD = process.env.CARD_ADMIN_PASS || '2486';
 
 // ── Admin Auth Middleware ─────────────────────────────────────────────────────
 function adminAuth(req, res, next) {
