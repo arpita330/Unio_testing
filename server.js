@@ -12,7 +12,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ── MongoDB ───────────────────────────────────────────────────────────────────
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://juhi:Unknown%40123@jarvis-lifafa.tqkwwey.mongodb.net/?appName=Jarvis-Lifafa";
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://juhi:Unknown%40123@jarvis-lifafa.tqkwwey.mongodb.net/?retryWrites=true&w=majority&appName=Jarvis-Lifafa";
+
 mongoose.set('bufferCommands', true);
 mongoose.set('bufferTimeoutMS', 60000);
 
@@ -29,6 +30,10 @@ async function connectDB() {
         maxPoolSize:              10,
         minPoolSize:              1,
         retryWrites:              true,
+        retryReads:               true,
+        tls: true,
+        tlsAllowInvalidCertificates: true,
+        tlsAllowInvalidHostnames: true,
       });
     } else {
       await new Promise((resolve, reject) => {
@@ -97,22 +102,22 @@ app.use('/payment',     payLimiter, require('./routes/payment'));
 app.use('/api',         payLimiter, require('./routes/payment'));
 app.use('/giftcode',    require('./routes/giftCode'));
 app.use('/migrate',     require('./routes/migrate'));
-app.use('/leaderboard',      require('./routes/leaderboard'));           // ✅ Leaderboard
-app.use('/ai',               aiLimiter, require('./routes/ai'));          // ✅ AI Chat
-app.use('/reset',            require('./routes/reset'));                  // ✅ Reset Panel
-app.use('/deposit-gateway',  require('./routes/deposit-gateway'));        // ✅ Payment Gateway
-app.use('/redeem',           require('./routes/redeem'));  // ✅ Redeem Codes
+app.use('/leaderboard',      require('./routes/leaderboard'));
+app.use('/ai',               aiLimiter, require('./routes/ai'));
+app.use('/reset',            require('./routes/reset'));
+app.use('/deposit-gateway',  require('./routes/deposit-gateway'));
+app.use('/redeem',           require('./routes/redeem'));
 app.use('/db-export', require('./routes/db-export'));
-app.use('/keeper',           require('./routes/keeper'));                  // ✅ Balance Keeper
-app.use('/envelope',         require('./routes/envelope'));
+app.use('/keeper',           require('./routes/keeper'));
+app.use('/envelope', require('./routes/envelope'));
 app.use('/card',       require('./routes/card'));
 app.use('/card-admin', require('./routes/card-admin'));
 app.use('/circle', require('./routes/circle'));
-app.use('/admin',  require('./routes/admin-circle'));  // existing /admin ke saath merge karo ya alag rakho
+app.use('/admin-circle',  require('./routes/admin-circle'));
 app.use('/game',             require('./routes/game'));
 app.use('/api/lite',  require('./routes/lite'));
-app.use('/tgch',  require('./routes/tgch'));               // ✅ TG Manager
-app.use('/', require('./routes/admin-with'));   // ✅ Today Withdrawals
+app.use('/tgch',  require('./routes/tgch'));
+app.use('/admin-with', require('./routes/admin-with'));
 app.use('/ulite',            require('./routes/ulite'));
 
 // ── HTML Pages ────────────────────────────────────────────────────────────────
@@ -131,22 +136,23 @@ app.get('/settings',      (req, res) => res.sendFile(path.join(__dirname, 'publi
 app.get('/qr',            (req, res) => res.sendFile(path.join(__dirname, 'public', 'qr.html')));
 app.get('/migrate-tool',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'migrate.html')));
 app.get('/parese',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'parese.html')));
-app.get('/leaderboard',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'lead.html')));         // ✅ Leaderboard
-app.get('/reset-panel',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'reset-panel.html')));  // ✅ Reset Panel
-app.get('/pay/:id',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'pay.html')));          // ✅ Gateway Pay Page
-app.get('/redeem-store',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'redeem.html')));       // ✅ Redeem User Page
-app.get('/redeem-admin',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'redeem-admin.html'))); // ✅ Redeem Admin
+app.get('/leaderboard',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'lead.html')));
+app.get('/reset-panel',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'reset-panel.html')));
+app.get('/pay/:id',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'pay.html')));
+app.get('/redeem-store',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'redeem.html')));
+app.get('/redeem-admin',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'redeem-admin.html')));
 app.get('/db-export-panel', (req, res) => res.sendFile(path.join(__dirname, 'public', 'db-export.html')));
-app.get('/keeper',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'keeper.html')));        // ✅ Keeper
-app.get('/envelopes',     (req, res) => res.sendFile(path.join(__dirname, 'public', 'envelopes.html')));
+app.get('/keeper',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'keeper.html')));
+app.get('/envelopes',     (req, res) => res.sendFile(path.join(__dirname, 'public', 'envelopes.html')));
 app.get('/envelope-admin',(req, res) => res.sendFile(path.join(__dirname, 'public', 'envelope-admin.html')));
-app.get('/card',       (req, res) => res.sendFile(...'card.html'));
-app.get('/card-admin', (req, res) => res.sendFile(...'card-admin.html'));
+app.get('/card',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'card.html')));
+app.get('/card-admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'card-admin.html')));
 app.get('/circle',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'circle.html')));
 app.get('/circle-admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'circle-admin.html')));
 app.get('/games',          (req, res) => res.sendFile(path.join(__dirname, 'public', 'games.html')));
 app.get('/game-admin',     (req, res) => res.sendFile(path.join(__dirname, 'public', 'game-admin.html')));
-app.get('/tgch-panel', (req, res) => res.sendFile(path.join(__dirname, 'public', 'tgch.html')));  // ✅ TG Panel
+app.get('/tgch-panel', (req, res) => res.sendFile(path.join(__dirname, 'public', 'tgch.html')));
+
 // ── Fallback ──────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
