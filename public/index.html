@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UNIO Wallet</title>
+<title>Nexo Wallet</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -61,7 +61,7 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:60
 <div class="card">
   <div class="logo">
     <div class="logo-mark"><i class="fa-solid fa-wallet"></i></div>
-    <h1>UNIO</h1>
+    <h1>NEXO</h1>
     <p>Digital Wallet</p>
   </div>
 
@@ -114,11 +114,11 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:60
       <i class="fa-brands fa-telegram"></i>
       <div>
         <div style="font-size:.7rem;font-weight:700;opacity:.85">Start bot to receive OTP</div>
-        <div style="font-size:.8rem;font-weight:900">@OTP_UNIO_BOT</div>
+        <div style="font-size:.8rem;font-weight:900">@OTP_NEXO_BOT</div>
       </div>
     </a>
     <div class="otp-banner" id="otp-banner">
-      <i class="fa-solid fa-circle-check"></i> OTP sent! Check @OTP_UNIO_BOT
+      <i class="fa-solid fa-circle-check"></i> OTP sent! Check @OTP_NEXO_BOT
     </div>
     <div class="otp-row">
       <div class="input-group">
@@ -142,11 +142,9 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:60
 const API = 'https://unio-hazel.vercel.app';
 
 // --- AUTO LOGIN CHECK ---
-// Jab page load hoga, check karega ki token hai ya nahi
 window.onload = () => {
   const token = localStorage.getItem('token');
   if (token) {
-    // Agar token pehle se hai, toh login page dikhane ki zaroorat nahi
     window.location.href = 'pin.html';
   }
 };
@@ -199,7 +197,6 @@ async function login() {
       return;
     }
 
-    // SAVING DATA
     localStorage.setItem('token',   data.token);
     localStorage.setItem('user',    JSON.stringify(data.user));
     localStorage.setItem('pin_set', data.user.pin_set ? 'true' : 'false');
