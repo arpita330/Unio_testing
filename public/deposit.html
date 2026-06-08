@@ -153,8 +153,8 @@ body {
   cursor: pointer;
   transition: all .2s;
   font-family: inherit;
-  position: relative;
 }
+
 .btn:active { transform: scale(.98); }
 .btn:disabled {
   opacity: 0.6;
@@ -272,7 +272,7 @@ body {
   gap: 3px;
   color: #94a3b8;
   font-size: .6rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   cursor: pointer;
   text-decoration: none;
@@ -303,7 +303,7 @@ body {
     <div class="upi-box">
       <div class="upi-label">Pay to UPI ID</div>
       <div class="upi-id">sumitsharmaji001@ptyes</div>
-      <button class="copy-btn" onclick="copyUPI()">
+      <button class="copy-btn" id="copyUpiBtn">
         <i class="fa-solid fa-copy"></i> Copy UPI ID
       </button>
     </div>
@@ -370,12 +370,12 @@ body {
 
 <script>
 // ============================================================
-// CORRECT SESSION CHECK - Works with your existing login system
+// CORRECT SESSION MANAGEMENT - Uses same localStorage keys as your other pages
 // ============================================================
 
 const API = 'https://nexo-waiiet.vercel.app';
 
-// Simple token check - just reads from localStorage (same as dashboard)
+// Helper functions (same as dashboard.html)
 function getToken() {
   return localStorage.getItem('token');
 }
@@ -390,18 +390,16 @@ function getUser() {
   return null;
 }
 
-// Session validation - only at page load
+// Session validation - checks if user is logged in (same as dashboard)
 function validateSession() {
   const token = getToken();
   const user = getUser();
   
-  // If no token or no user, redirect to login
   if (!token || !user) {
     sessionStorage.setItem('auth_error', 'Session expired. Please login again.');
     window.location.href = 'index.html';
     return false;
   }
-  
   return true;
 }
 
@@ -420,6 +418,7 @@ function showMessage(text, type) {
   }, 5000);
 }
 
+// Copy UPI ID
 function copyUPI() {
   const upiText = 'sumitsharmaji001@ptyes';
   navigator.clipboard.writeText(upiText).then(() => {
@@ -439,8 +438,8 @@ function copyUPI() {
 let isSubmitting = false;
 
 // Submit deposit request
-async function handleSubmit() {
-  // Get token (same way as dashboard)
+async function submitDepositRequest() {
+  // Get token and user from localStorage (same as dashboard)
   const token = getToken();
   const user = getUser();
   
@@ -462,7 +461,7 @@ async function handleSubmit() {
   const utr = utrInput.value.trim();
   const amount = amountInput.value;
   
-  // Validate
+  // Validate inputs
   if (!utr) {
     showMessage('❌ UTR number required!', 'error');
     return;
@@ -494,7 +493,7 @@ async function handleSubmit() {
   isSubmitting = true;
   
   try {
-    console.log('Submitting deposit request with token:', token.substring(0, 20) + '...');
+    console.log('Submitting deposit request...');
     
     const response = await fetch(`${API}/wallet/deposit-request`, {
       method: 'POST',
@@ -510,11 +509,12 @@ async function handleSubmit() {
     
     console.log('Response status:', response.status);
     
-    // Handle 401/403 - token invalid
+    // Handle 401/403 - token invalid (same as dashboard)
     if (response.status === 401 || response.status === 403) {
       showMessage('❌ Session expired! Please login again.', 'error');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('pin_set');
       setTimeout(() => {
         window.location.href = 'index.html';
       }, 2000);
@@ -557,31 +557,37 @@ async function handleSubmit() {
   }
 }
 
-// Page initialization - validate session ONCE on page load
+// Page initialization
 function initPage() {
-  // First, validate session using the same method as dashboard
+  // Validate session (redirects to index.html if no token)
   if (!validateSession()) {
-    return; // validateSession redirects if needed
+    return;
   }
   
-  // Display user info (same as dashboard)
+  // Display user info (optional - for debugging)
   const user = getUser();
   if (user && user.name) {
-    console.log('Welcome back, ' + user.name);
+    console.log('Logged in as:', user.name);
   }
   
-  // Attach submit handler
+  // Attach event listeners
   const submitBtn = document.getElementById('submitBtn');
   if (submitBtn) {
-    // Remove existing listeners and add new one
     const newBtn = submitBtn.cloneNode(true);
     submitBtn.parentNode.replaceChild(newBtn, submitBtn);
-    newBtn.addEventListener('click', handleSubmit);
+    newBtn.addEventListener('click', submitDepositRequest);
   }
   
-  // Setup navigation protection
-  const navLinks = ['backLink', 'navHome', 'navSend', 'navWithdraw', 'navLifafa'];
-  navLinks.forEach(id => {
+  const copyBtn = document.getElementById('copyUpiBtn');
+  if (copyBtn) {
+    const newCopyBtn = copyBtn.cloneNode(true);
+    copyBtn.parentNode.replaceChild(newCopyBtn, copyBtn);
+    newCopyBtn.addEventListener('click', copyUPI);
+  }
+  
+  // Navigation protection
+  const protectedLinks = ['backLink', 'navHome', 'navSend', 'navWithdraw', 'navLifafa'];
+  protectedLinks.forEach(id => {
     const el = document.getElementById(id);
     if (el && el.tagName === 'A') {
       el.addEventListener('click', (e) => {
@@ -594,10 +600,10 @@ function initPage() {
     }
   });
   
-  // Listen for token changes from other tabs
+  // Listen for logout from other tabs
   window.addEventListener('storage', (event) => {
     if (event.key === 'token' && !event.newValue) {
-      showMessage('⚠️ Session ended in another tab. Please login again.', 'warning');
+      showMessage('⚠️ You have been logged out from another tab.', 'warning');
       setTimeout(() => {
         window.location.href = 'index.html';
       }, 2000);
@@ -607,10 +613,6 @@ function initPage() {
 
 // Start the app
 initPage();
-
-// Expose functions globally
-window.copyUPI = copyUPI;
-window.handleSubmit = handleSubmit;
 </script>
 </body>
 </html>
