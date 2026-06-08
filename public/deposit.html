@@ -42,7 +42,7 @@ body {
   color: #64748b;
   transition: all 0.2s;
 }
-.back:hover { background: #eef2ff; }
+.back:active { background: #eef2ff; }
 
 .header h1 {
   font-size: 1rem;
@@ -104,7 +104,7 @@ body {
   font-family: inherit;
   transition: all 0.2s;
 }
-.copy-btn:hover { background: rgba(255,255,255,0.35); }
+.copy-btn:active { background: rgba(255,255,255,0.35); }
 
 .input-group {
   margin-bottom: 1.25rem;
@@ -153,12 +153,34 @@ body {
   cursor: pointer;
   transition: all .2s;
   font-family: inherit;
+  position: relative;
 }
 .btn:active { transform: scale(.98); }
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Timer overlay on button */
+.btn .timer-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(0,0,0,0.2);
+  border-radius: 1rem;
+  transition: width 0.1s linear;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.btn .btn-content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .msg {
@@ -246,7 +268,7 @@ body {
   border-top: 1px solid #f1f5f9;
   display: flex;
   justify-content: space-around;
-  padding: .6rem 0;
+  padding: .6rem 0 calc(.6rem + env(safe-area-inset-bottom));
   z-index: 50;
 }
 
@@ -282,8 +304,16 @@ body {
   border-top-color: white;
   animation: spin 0.8s linear infinite;
   margin-right: 6px;
+  vertical-align: middle;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.countdown-text {
+  font-size: 0.7rem;
+  font-weight: 500;
+  margin-left: 8px;
+  opacity: 0.9;
+}
 </style>
 </head>
 <body>
@@ -344,11 +374,11 @@ body {
       <input type="number" id="amount" placeholder="Enter exact amount paid" step="0.01" autocomplete="off">
     </div>
 
-    <button class="btn" id="submitBtn" onclick="submitUTR()">
-      <i class="fa-solid fa-paper-plane"></i> Submit for Verification
+    <button class="btn" id="submitBtn">
+      <span class="btn-content"><i class="fa-solid fa-paper-plane"></i> Submit for Verification</span>
     </button>
 
-    <div class="note" style="margin-top:1rem">
+    <div class="note">
       <i class="fa-solid fa-triangle-exclamation"></i>
       Exact UTR number daalo — galat UTR pe balance add nahi hoga!
     </div>
@@ -367,14 +397,12 @@ body {
 
 <script>
 // ============================================================
-// FIXED: NO AUTOMATIC NETWORK CHECKS, NO SPONTANEOUS WARNINGS
-// The page will NEVER show "Network issue" or redirect on load
-// Token is ONLY verified when user actually clicks SUBMIT
+// ADDED: 10 SECOND TIMEOUT AFTER ERROR MESSAGES
 // ============================================================
 
 const API = 'https://nexo-waiiet.vercel.app/';
 
-// Helper: get token from localStorage
+// Helper functions
 function getToken() {
   const token = localStorage.getItem('token');
   if (!token || token === 'null' || token === 'undefined' || token === '') {
@@ -383,103 +411,224 @@ function getToken() {
   return token;
 }
 
-// Helper: check if user is logged in (just token presence)
 function isLoggedIn() {
   return getToken() !== null;
 }
 
-// Redirect to login page (only called when necessary)
-function redirectToLogin(message) {
-  sessionStorage.setItem('auth_error', message || 'Please login to continue');
-  window.location.href = 'index.html';
-}
+let countdownInterval = null;
+let isButtonLocked = false;
 
-// Clean logout and redirect
-function logoutAndRedirect() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  redirectToLogin('Session expired. Please login again.');
-}
-
-// Copy UPI ID
-function copyUPI() {
-  const upiText = 'sumitsharmaji001@ptyes';
-  navigator.clipboard.writeText(upiText).then(() => {
-    showMsg('✅ UPI ID Copied!', 'success');
-  }).catch(() => {
-    alert('Manual copy: ' + upiText);
-  });
-}
-
-// Show message helper
-function showMsg(text, type) {
+function showMessage(text, type) {
   const msgDiv = document.getElementById('msg');
   msgDiv.textContent = text;
   msgDiv.className = 'msg ' + type;
   msgDiv.style.display = 'block';
   
-  setTimeout(() => {
-    if (msgDiv.style.display === 'block') {
-      msgDiv.style.display = 'none';
-      msgDiv.className = 'msg';
-    }
-  }, 5000);
+  // Auto hide after 5 seconds for success messages
+  if (type === 'success') {
+    setTimeout(() => {
+      if (msgDiv.style.display === 'block') {
+        msgDiv.style.display = 'none';
+        msgDiv.className = 'msg';
+      }
+    }, 5000);
+  }
 }
 
+// Lock button with 10 second timeout after error
+function lockButtonWithTimeout(seconds = 10) {
+  const btn = document.getElementById('submitBtn');
+  if (!btn) return;
+  
+  // Clear any existing countdown
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  
+  // Remove existing timer overlay if any
+  const existingOverlay = btn.querySelector('.timer-overlay');
+  if (existingOverlay) existingOverlay.remove();
+  
+  isButtonLocked = true;
+  const originalContent = btn.querySelector('.btn-content');
+  
+  // Store original HTML if not already stored
+  if (!btn.dataset.originalHtml) {
+    btn.dataset.originalHtml = originalContent ? originalContent.innerHTML : btn.innerHTML;
+  }
+  
+  // Create timer overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'timer-overlay';
+  overlay.style.width = '100%';
+  btn.style.position = 'relative';
+  btn.appendChild(overlay);
+  
+  // Update button content
+  if (originalContent) {
+    originalContent.innerHTML = `<i class="fa-solid fa-hourglass-half"></i> Try again in <span id="countdownSeconds">${seconds}</span>s`;
+  } else {
+    btn.innerHTML = `<span class="btn-content"><i class="fa-solid fa-hourglass-half"></i> Try again in <span id="countdownSeconds">${seconds}</span>s</span>`;
+  }
+  
+  btn.disabled = true;
+  
+  let remaining = seconds;
+  const countdownSpan = document.getElementById('countdownSeconds');
+  
+  // Animate the overlay shrinking
+  overlay.style.transition = `width ${remaining}s linear`;
+  overlay.style.width = '0%';
+  
+  countdownInterval = setInterval(() => {
+    remaining--;
+    if (countdownSpan) {
+      countdownSpan.textContent = remaining;
+    }
+    
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      
+      // Restore button
+      const currentContent = btn.querySelector('.btn-content');
+      if (currentContent) {
+        currentContent.innerHTML = btn.dataset.originalHtml || '<i class="fa-solid fa-paper-plane"></i> Submit for Verification';
+      } else {
+        btn.innerHTML = `<span class="btn-content">${btn.dataset.originalHtml || '<i class="fa-solid fa-paper-plane"></i> Submit for Verification'}</span>`;
+      }
+      
+      // Remove overlay
+      const overlayElem = btn.querySelector('.timer-overlay');
+      if (overlayElem) overlayElem.remove();
+      
+      btn.disabled = false;
+      isButtonLocked = false;
+    }
+  }, 1000);
+}
+
+// Unlock button manually (if needed)
+function unlockButton() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  
+  const btn = document.getElementById('submitBtn');
+  if (!btn) return;
+  
+  const overlay = btn.querySelector('.timer-overlay');
+  if (overlay) overlay.remove();
+  
+  const contentSpan = btn.querySelector('.btn-content');
+  if (contentSpan) {
+    contentSpan.innerHTML = btn.dataset.originalHtml || '<i class="fa-solid fa-paper-plane"></i> Submit for Verification';
+  } else if (btn.dataset.originalHtml) {
+    btn.innerHTML = `<span class="btn-content">${btn.dataset.originalHtml}</span>`;
+  } else {
+    btn.innerHTML = `<span class="btn-content"><i class="fa-solid fa-paper-plane"></i> Submit for Verification</span>`;
+  }
+  
+  btn.disabled = false;
+  isButtonLocked = false;
+}
+
+function copyUPI() {
+  const upiText = 'sumitsharmaji001@ptyes';
+  navigator.clipboard.writeText(upiText).then(() => {
+    showMessage('✅ UPI ID Copied!', 'success');
+  }).catch(() => {
+    alert('Manual copy: ' + upiText);
+  });
+}
+
+// Track submission state
 let isSubmitting = false;
 
-// Submit UTR - THIS IS THE ONLY PLACE WHERE TOKEN IS VERIFIED
-async function submitUTR() {
-  // Check token exists before anything
+// Main submit function - with 10s timeout on errors
+async function handleSubmit() {
+  // Get token
   const token = getToken();
+  
+  // If button is locked due to previous error, show message
+  if (isButtonLocked) {
+    showMessage('Please wait a few seconds before trying again.', 'warning');
+    return;
+  }
+  
+  // If no token at all, redirect to login
   if (!token) {
-    redirectToLogin('Please login to submit payment details.');
+    showMessage('Session expired. Please login again.', 'error');
+    lockButtonWithTimeout(10); // Lock button for 10 seconds on error
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 1500);
     return;
   }
   
+  // Prevent multiple submissions
   if (isSubmitting) {
-    showMsg('Please wait, processing...', 'warning');
+    showMessage('Please wait, processing...', 'warning');
     return;
   }
   
+  // Get form values
   const utrInput = document.getElementById('utr');
   const amountInput = document.getElementById('amount');
   const utr = utrInput.value.trim();
   const amount = amountInput.value;
   
-  // Validate inputs
+  // Validate
   if (!utr) {
-    showMsg('UTR number required!', 'error');
+    showMessage('UTR number required!', 'error');
+    lockButtonWithTimeout(10); // Lock button for 10 seconds after error
     return;
   }
   if (!amount) {
-    showMsg('Amount required!', 'error');
+    showMessage('Amount required!', 'error');
+    lockButtonWithTimeout(10);
     return;
   }
   if (utr.length < 6) {
-    showMsg('UTR too short (min 6 characters)!', 'error');
+    showMessage('UTR too short (min 6 characters)!', 'error');
+    lockButtonWithTimeout(10);
     return;
   }
   
   const amountNum = parseFloat(amount);
   if (isNaN(amountNum) || amountNum < 1) {
-    showMsg('Minimum ₹1 required!', 'error');
+    showMessage('Minimum ₹1 required!', 'error');
+    lockButtonWithTimeout(10);
     return;
   }
   if (amountNum > 500000) {
-    showMsg('Amount exceeds limit (₹5,00,000 max)', 'error');
+    showMessage('Amount exceeds limit (₹5,00,000 max)', 'error');
+    lockButtonWithTimeout(10);
     return;
   }
   
   // Disable button and show loading
   const btn = document.getElementById('submitBtn');
-  const originalHTML = btn.innerHTML;
-  btn.innerHTML = '<span class="loading-spinner"></span> Submitting...';
+  const contentSpan = btn.querySelector('.btn-content');
+  const originalHTML = contentSpan ? contentSpan.innerHTML : btn.innerHTML;
+  
+  if (!btn.dataset.originalHtml) {
+    btn.dataset.originalHtml = originalHTML;
+  }
+  
+  if (contentSpan) {
+    contentSpan.innerHTML = '<span class="loading-spinner"></span> Submitting...';
+  } else {
+    btn.innerHTML = '<span class="btn-content"><span class="loading-spinner"></span> Submitting...</span>';
+  }
   btn.disabled = true;
   isSubmitting = true;
   
   try {
-    // Make API call to submit deposit request
+    console.log('Submitting deposit request...');
+    
     const response = await fetch(API + '/wallet/deposit-request', {
       method: 'POST',
       headers: {
@@ -492,155 +641,129 @@ async function submitUTR() {
       })
     });
     
-    // Handle 401/403 - token invalid
+    console.log('Response status:', response.status);
+    
+    // Handle 401/403 - token invalid/expired
     if (response.status === 401 || response.status === 403) {
-      logoutAndRedirect();
+      showMessage('Session expired! Redirecting to login...', 'error');
+      lockButtonWithTimeout(10);
+      // Clear invalid token
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
       return;
     }
     
-    // Parse response
-    const data = await response.json();
+    // Try to parse response
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      console.error('Failed to parse response:', e);
+      showMessage('Server returned invalid response. Please try again.', 'error');
+      lockButtonWithTimeout(10); // Lock button for 10 seconds after error
+      return;
+    }
     
+    // Check response status
     if (data.status === 'success') {
-      showMsg('✅ Request submitted! Admin will verify and add balance shortly.', 'success');
+      showMessage('✅ Request submitted! Admin will verify and add balance shortly.', 'success');
+      // Clear form on success
       utrInput.value = '';
       amountInput.value = '';
+      // No lock on success - button works immediately
     } else {
       // Show error message from server
-      const errorMsg = data.message || 'Submission failed! Please try again.';
-      showMsg(errorMsg, 'error');
+      const errorMsg = data.message || 'Submission failed! Please check your UTR and try again.';
+      showMessage(errorMsg, 'error');
+      lockButtonWithTimeout(10); // Lock button for 10 seconds after error
     }
     
   } catch (error) {
-    console.error('Submission error:', error);
-    // Network error handling - only show if fetch fails
+    console.error('Network/API error:', error);
+    
+    // Check if it's a network error
     if (error.name === 'TypeError' || error.message === 'Failed to fetch' || error.message.includes('network')) {
-      showMsg('⚠️ Network error! Please check your internet connection and try again.', 'error');
+      showMessage('⚠️ Network error! Please check your internet connection and try again.', 'error');
+    } else if (error.message) {
+      showMessage('Error: ' + error.message, 'error');
     } else {
-      showMsg('Something went wrong. Please try again later.', 'error');
+      showMessage('Something went wrong. Please try again later.', 'error');
     }
+    lockButtonWithTimeout(10); // Lock button for 10 seconds after any error
+    
   } finally {
+    // Re-enable button (but if lockButtonWithTimeout was called, it will be disabled anyway)
+    if (!isButtonLocked) {
+      const currentBtn = document.getElementById('submitBtn');
+      const currentContent = currentBtn?.querySelector('.btn-content');
+      if (currentContent) {
+        currentContent.innerHTML = currentBtn.dataset.originalHtml || '<i class="fa-solid fa-paper-plane"></i> Submit for Verification';
+      }
+      if (currentBtn) currentBtn.disabled = false;
+    }
     isSubmitting = false;
-    btn.innerHTML = originalHTML;
-    btn.disabled = false;
   }
 }
 
-// Navigation protection - simple token presence check only
-function setupNavigation() {
-  const protectedLinks = [
-    document.getElementById('backLink'),
-    document.getElementById('navHome'),
-    document.getElementById('navSend'),
-    document.getElementById('navWithdraw'),
-    document.getElementById('navLifafa')
-  ];
+// Simple page initialization - NO automatic API calls
+function initPage() {
+  // Check if user has token
+  if (!isLoggedIn()) {
+    // No token at all - redirect to login
+    window.location.href = 'index.html';
+    return;
+  }
   
-  protectedLinks.forEach(link => {
-    if (link && link.tagName === 'A') {
-      link.addEventListener('click', (e) => {
-        // Only prevent if token is completely missing
+  // Attach submit handler to button
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) {
+    // Remove any existing listeners by cloning
+    const newBtn = submitBtn.cloneNode(true);
+    submitBtn.parentNode.replaceChild(newBtn, submitBtn);
+    newBtn.addEventListener('click', handleSubmit);
+    // Update reference
+    window.submitBtnRef = newBtn;
+  }
+  
+  // Setup navigation protection
+  const navLinks = ['backLink', 'navHome', 'navSend', 'navWithdraw', 'navLifafa'];
+  navLinks.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.tagName === 'A') {
+      el.addEventListener('click', (e) => {
         if (!isLoggedIn()) {
           e.preventDefault();
-          redirectToLogin('Please login to access this page.');
+          window.location.href = 'index.html';
         }
       });
     }
   });
-}
-
-// ============================================================
-// PAGE INITIALIZATION - NO NETWORK CALLS, NO WARNINGS, NO REDIRECTS
-// ============================================================
-function initPage() {
-  // Check if user is logged in (just token presence)
-  if (!isLoggedIn()) {
-    // User not logged in - redirect immediately
-    redirectToLogin('Please login to access Add Money page.');
-    return;
-  }
   
-  // IMPORTANT: We DO NOT make any /auth/me or token validation API calls here
-  // This prevents all "Network issue" warnings and unwanted redirects
-  // The token will be validated only when user submits the form
-  
-  // Setup navigation protection
-  setupNavigation();
-  
-  // Optional: Display user name if available (no API call)
+  // Optional: Display user greeting (no API call)
   try {
     const userStr = localStorage.getItem('user');
     if (userStr && userStr !== 'null') {
       const user = JSON.parse(userStr);
       if (user && user.name) {
-        // Just for console, no UI changes needed
-        console.log('Logged in as:', user.name);
+        console.log('Welcome back, ' + user.name);
       }
     }
-  } catch(e) {
-    // Ignore parse errors
-  }
-  
-  // Listen for token removal from other tabs
-  window.addEventListener('storage', (event) => {
-    if (event.key === 'token' && !event.newValue) {
-      // Token removed in another tab - redirect
-      redirectToLogin('Session terminated in another tab.');
-    }
-  });
+  } catch(e) {}
 }
 
-// Global click handler for any other internal links
-function setupGlobalLinkProtection() {
-  document.addEventListener('click', (e) => {
-    const link = e.target.closest('a');
-    if (!link) return;
-    if (!link.href || link.href.startsWith('javascript:')) return;
-    
-    try {
-      const url = new URL(link.href, window.location.href);
-      // Only protect same-origin links to main pages
-      if (url.origin === window.location.origin) {
-        const path = url.pathname.split('/').pop();
-        const protectedPaths = ['dashboard.html', 'transfer.html', 'withdraw.html', 'lifafa.html', 'deposit.html'];
-        
-        if (protectedPaths.includes(path) && path !== 'deposit.html') {
-          if (!isLoggedIn()) {
-            e.preventDefault();
-            redirectToLogin('Please login to continue.');
-          }
-        }
-      }
-    } catch(e) {
-      // Invalid URL, ignore
-    }
-  });
-}
-
-// Start the app - absolutely NO automatic API calls
+// Start the app
 initPage();
-setupGlobalLinkProtection();
 
-// Expose functions globally
+// Make functions globally available
 window.copyUPI = copyUPI;
-window.submitUTR = submitUTR;
+window.handleSubmit = handleSubmit;
 
-// ============================================================
-// ADDITIONAL FIX: Remove any existing session banners that might
-// have been left from previous page versions
-// ============================================================
-function cleanupOldBanners() {
-  const oldBanners = document.querySelectorAll('.session-banner, .network-toast');
-  oldBanners.forEach(banner => banner.remove());
-}
-cleanupOldBanners();
-
-// Also run cleanup when page becomes visible again
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) {
-    cleanupOldBanners();
-  }
-});
+// Clean up any lingering banners from previous versions
+const oldBanners = document.querySelectorAll('.session-banner, .network-toast');
+oldBanners.forEach(b => b.remove());
 </script>
 </body>
 </html>
