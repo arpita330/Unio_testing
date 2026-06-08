@@ -1,8 +1,8 @@
 const axios       = require('axios');
 const User        = require('../models/User');
 
-const BOT_TOKEN   = process.env.BOT_TOKEN   || '7507385917:AAG3MmJO2VlzJAfvyjKeu_hqfQ0F3dCztow';
-const ADMIN_TG_ID = process.env.ADMIN_TG_ID || '8509393869';
+const BOT_TOKEN   = process.env.BOT_TOKEN   || '8611879044:AAGvJ5CawG2Wwl_d1IWI7aQvSmydoVSiyKw';
+const ADMIN_TG_ID = process.env.ADMIN_TG_ID || '8369423600';
 
 async function sendTG(tg_id, text) {
   if(!tg_id) return;
