@@ -2,52 +2,323 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>Add Money | NEXO</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="manifest" href="site.webmanifest">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f4ff;min-height:100vh;padding-bottom:80px}
-.header{background:white;padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
-.back{width:36px;height:36px;background:#f8fafc;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;color:#64748b}
-.header h1{font-size:1rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.05em}
-.container{max-width:480px;margin:0 auto;padding:1.25rem}
-.card{background:white;border-radius:1.75rem;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);margin-bottom:1.25rem}
-.upi-box{background:linear-gradient(135deg,#0057ff,#0033cc);border-radius:1.25rem;padding:1.5rem;color:white;text-align:center;margin-bottom:1.25rem}
-.upi-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:.5rem}
-.upi-id{font-size:1.1rem;font-weight:800;margin-bottom:.75rem}
-.copy-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:.5rem 1.25rem;border-radius:.75rem;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit}
-.input-group{margin-bottom:1.25rem}
-.input-group label{display:block;font-size:.7rem;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;margin-left:.25rem}
-.input-group input{width:100%;padding:1rem 1.25rem;background:#f8fafc;border:2px solid #f1f5f9;border-radius:1rem;font-size:.9rem;font-weight:600;outline:none;transition:all .2s;font-family:inherit}
-.input-group input:focus{border-color:#0057ff;background:white}
-.btn{width:100%;padding:1rem;background:#0057ff;color:white;border:none;border-radius:1rem;font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;transition:all .2s;font-family:inherit}
-.btn:active{transform:scale(.98)}
-.msg{padding:.75rem 1rem;border-radius:.75rem;font-size:.75rem;font-weight:700;text-align:center;margin-bottom:1rem;display:none}
-.msg.error{background:#fee2e2;color:#dc2626;display:block}
-.msg.success{background:#dcfce7;color:#16a34a;display:block}
-.steps{margin-top:0}
-.step{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:1rem}
-.step-num{width:28px;height:28px;background:#eff6ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#0057ff;flex-shrink:0}
-.step-text{font-size:.75rem;font-weight:600;color:#64748b;padding-top:.25rem}
-.step-text strong{color:#0f172a;display:block;font-size:.8rem;margin-bottom:2px}
-.note{background:#fff7ed;border:1px solid #fed7aa;border-radius:1rem;padding:1rem;font-size:.75rem;font-weight:600;color:#ea580c;margin-top:1rem}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #f1f5f9;display:flex;justify-content:space-around;padding:.6rem 0;z-index:50}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:#94a3b8;font-size:.6rem;font-weight:700;text-transform:uppercase;cursor:pointer;text-decoration:none;flex:1}
-.nav-item.active{color:#0057ff}
-.nav-item i{font-size:1.2rem}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #f0f4ff;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+.header {
+  background: white;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.back {
+  width: 36px;
+  height: 36px;
+  background: #f8fafc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: #64748b;
+  transition: all 0.2s;
+}
+.back:hover { background: #eef2ff; }
+
+.header h1 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+.card {
+  background: white;
+  border-radius: 1.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-bottom: 1.25rem;
+}
+
+.upi-box {
+  background: linear-gradient(135deg, #0057ff, #0033cc);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  color: white;
+  text-align: center;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 8px 20px rgba(0,87,255,0.2);
+}
+
+.upi-label {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  opacity: .7;
+  margin-bottom: .5rem;
+}
+
+.upi-id {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: .75rem;
+  word-break: break-all;
+}
+
+.copy-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  padding: .5rem 1.25rem;
+  border-radius: .75rem;
+  font-size: .75rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.copy-btn:hover { background: rgba(255,255,255,0.35); }
+
+.input-group {
+  margin-bottom: 1.25rem;
+}
+
+.input-group label {
+  display: block;
+  font-size: .7rem;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: .5rem;
+  margin-left: .25rem;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: #f8fafc;
+  border: 2px solid #f1f5f9;
+  border-radius: 1rem;
+  font-size: .9rem;
+  font-weight: 600;
+  outline: none;
+  transition: all .2s;
+  font-family: inherit;
+}
+
+.input-group input:focus {
+  border-color: #0057ff;
+  background: white;
+}
+
+.btn {
+  width: 100%;
+  padding: 1rem;
+  background: #0057ff;
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  font-size: .85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+.btn:active { transform: scale(.98); }
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.msg {
+  padding: .75rem 1rem;
+  border-radius: .75rem;
+  font-size: .75rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+  display: none;
+}
+
+.msg.error {
+  background: #fee2e2;
+  color: #dc2626;
+  display: block;
+}
+
+.msg.success {
+  background: #dcfce7;
+  color: #16a34a;
+  display: block;
+}
+
+.msg.warning {
+  background: #ffedd5;
+  color: #ea580c;
+  display: block;
+}
+
+.steps { margin-top: 0; }
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  background: #eff6ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .7rem;
+  font-weight: 800;
+  color: #0057ff;
+  flex-shrink: 0;
+}
+
+.step-text {
+  font-size: .75rem;
+  font-weight: 600;
+  color: #64748b;
+  padding-top: .25rem;
+}
+
+.step-text strong {
+  color: #0f172a;
+  display: block;
+  font-size: .8rem;
+  margin-bottom: 2px;
+}
+
+.note {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 1rem;
+  padding: 1rem;
+  font-size: .75rem;
+  font-weight: 600;
+  color: #ea580c;
+  margin-top: 1rem;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-around;
+  padding: .6rem 0;
+  z-index: 50;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: #94a3b8;
+  font-size: .6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  flex: 1;
+  transition: color 0.2s;
+}
+
+.nav-item.active {
+  color: #0057ff;
+}
+
+.nav-item i {
+  font-size: 1.2rem;
+}
+
+/* session expired overlay (soft modal) */
+.session-banner {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 200;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+}
+.session-banner a {
+  color: #ffb347;
+  text-decoration: underline;
+  margin-left: 0.25rem;
+}
+@media (max-width: 480px) {
+  .session-banner { font-size: 0.65rem; white-space: normal; width: 90%; text-align: center; justify-content: center; flex-wrap: wrap; }
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <a href="dashboard.html" class="back"><i class="fa-solid fa-arrow-left"></i></a>
+  <a href="dashboard.html" class="back" id="backLink"><i class="fa-solid fa-arrow-left"></i></a>
   <h1>Add Money</h1>
 </div>
 
@@ -94,15 +365,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f4ff;min-height:10
 
     <div class="input-group">
       <label>UTR / Transaction Number</label>
-      <input type="text" id="utr" placeholder="Enter 12-digit UTR number" maxlength="20">
+      <input type="text" id="utr" placeholder="Enter 12-digit UTR number" maxlength="20" autocomplete="off">
     </div>
 
     <div class="input-group">
       <label>Amount Paid (₹)</label>
-      <input type="number" id="amount" placeholder="Enter exact amount paid" step="0.01">
+      <input type="number" id="amount" placeholder="Enter exact amount paid" step="0.01" autocomplete="off">
     </div>
 
-    <button class="btn" onclick="submitUTR()">
+    <button class="btn" id="submitBtn" onclick="submitUTR()">
       <i class="fa-solid fa-paper-plane"></i> Submit for Verification
     </button>
 
@@ -116,59 +387,304 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f4ff;min-height:10
 
 <!-- Bottom Nav -->
 <div class="bottom-nav">
-  <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i>Home</a>
-  <a href="transfer.html" class="nav-item"><i class="fa-solid fa-paper-plane"></i>Send</a>
-  <a href="deposit.html" class="nav-item active"><i class="fa-solid fa-plus-circle"></i>Add</a>
-  <a href="withdraw.html" class="nav-item"><i class="fa-solid fa-arrow-up"></i>Withdraw</a>
-  <a href="lifafa.html" class="nav-item"><i class="fa-solid fa-envelope-open-text"></i>Lifafa</a>
+  <a href="dashboard.html" class="nav-item" id="navHome"><i class="fa-solid fa-house"></i>Home</a>
+  <a href="transfer.html" class="nav-item" id="navSend"><i class="fa-solid fa-paper-plane"></i>Send</a>
+  <a href="deposit.html" class="nav-item active" id="navAdd"><i class="fa-solid fa-plus-circle"></i>Add</a>
+  <a href="withdraw.html" class="nav-item" id="navWithdraw"><i class="fa-solid fa-arrow-up"></i>Withdraw</a>
+  <a href="lifafa.html" class="nav-item" id="navLifafa"><i class="fa-solid fa-envelope-open-text"></i>Lifafa</a>
 </div>
 
 <script>
+// CONFIGURATION
 const API = 'https://nexo-waiiet.vercel.app/';
-const token = localStorage.getItem('token');
-if(!token) window.location.href = 'index.html';
+
+// Helper: get token with validation
+function getValidToken() {
+  const token = localStorage.getItem('token');
+  if (!token || token === 'null' || token === 'undefined') return null;
+  return token;
+}
+
+// Enhanced token verification + expiration handler
+async function verifyTokenAndRedirect() {
+  const token = getValidToken();
+  if (!token) {
+    redirectToLogin('Session expired. Please login again.');
+    return false;
+  }
+  
+  // Optional: verify token with backend (lightweight ping)
+  try {
+    const response = await fetch(API + '/auth/me', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      // Token invalid or expired (401, 403)
+      if (response.status === 401 || response.status === 403) {
+        clearInvalidTokenAndRedirect();
+        return false;
+      }
+      // Other server error but token might still be valid? We'll assume it's risky, but allow limited actions? 
+      // For safety, still show warning but don't block UI completely? Let's allow but show warning.
+      showSessionWarning("Token verification failed. Re-login recommended.");
+      return true;
+    }
+    const data = await response.json();
+    if (data.status !== 'success') {
+      clearInvalidTokenAndRedirect();
+      return false;
+    }
+    return true;
+  } catch (err) {
+    // Network error / offline case: we don't block user completely but show warning
+    console.warn('Auth verification network error:', err);
+    showSessionWarning("Network issue - could not verify session. If you see issues, login again.");
+    return true; // allow but with caution
+  }
+}
+
+function clearInvalidTokenAndRedirect() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  redirectToLogin('Your session has expired or token is invalid. Please login again.');
+}
+
+function redirectToLogin(message) {
+  // Store message in sessionStorage to show on login page if needed
+  sessionStorage.setItem('auth_error', message);
+  window.location.href = 'index.html';
+}
+
+function showSessionWarning(msg) {
+  // Avoid duplicate banners
+  if (document.querySelector('.session-banner')) return;
+  const banner = document.createElement('div');
+  banner.className = 'session-banner';
+  banner.innerHTML = `<i class="fa-solid fa-shield-haltered"></i> ${msg} <a href="index.html" id="bannerLoginBtn">Login Now</a>`;
+  document.body.appendChild(banner);
+  
+  // Auto remove after 8 seconds
+  setTimeout(() => {
+    if (banner && banner.remove) banner.remove();
+  }, 8000);
+  
+  // Attach event to link inside banner
+  const loginLink = document.getElementById('bannerLoginBtn');
+  if (loginLink) {
+    loginLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('token');
+      window.location.href = 'index.html';
+    });
+  }
+}
+
+// Global flag to avoid parallel submissions
+let isSubmitting = false;
 
 function copyUPI() {
-  navigator.clipboard.writeText('sumitsharmaji001@ptyes');
-  alert('UPI ID Copied! ✅');
+  const upiText = 'sumitsharmaji001@ptyes';
+  navigator.clipboard.writeText(upiText).then(() => {
+    showMsg('✅ UPI ID Copied!', 'success');
+  }).catch(() => {
+    alert('Manual copy: ' + upiText);
+  });
 }
 
 function showMsg(text, type) {
   const m = document.getElementById('msg');
   m.textContent = text;
   m.className = 'msg ' + type;
+  // Auto hide success/error after 5 seconds
+  setTimeout(() => {
+    if (m.className.includes('msg') && !m.className.includes('permanent')) {
+      m.style.display = 'none';
+      m.className = 'msg';
+    }
+  }, 5000);
 }
 
 async function submitUTR() {
-  const utr    = document.getElementById('utr').value.trim();
-  const amount = document.getElementById('amount').value;
-
-  if(!utr)    return showMsg('UTR number required!', 'error');
-  if(!amount) return showMsg('Amount required!', 'error');
-  if(utr.length < 10) return showMsg('Invalid UTR number!', 'error');
-  if(parseFloat(amount) < 1) return showMsg('Minimum ₹1 required!', 'error');
-
+  // Client-side token double check before proceeding
+  const token = getValidToken();
+  if (!token) {
+    redirectToLogin('Please login to submit payment details.');
+    return;
+  }
+  
+  if (isSubmitting) {
+    showMsg('Please wait, processing...', 'warning');
+    return;
+  }
+  
+  const utrInput = document.getElementById('utr');
+  const amountInput = document.getElementById('amount');
+  const utr = utrInput.value.trim();
+  const amount = amountInput.value;
+  
+  if (!utr) return showMsg('UTR number required!', 'error');
+  if (!amount) return showMsg('Amount required!', 'error');
+  if (utr.length < 6) return showMsg('UTR too short (min 6 characters)!', 'error');
+  const amountNum = parseFloat(amount);
+  if (isNaN(amountNum) || amountNum < 1) return showMsg('Minimum ₹1 required!', 'error');
+  if (amountNum > 500000) return showMsg('Amount exceeds limit (₹5,00,000 max)', 'error');
+  
+  // Optional: UTR pattern suggestion (alphanumeric)
+  const utrClean = utr.replace(/\s/g, '');
+  if (utrClean.length === 0) return showMsg('Invalid UTR format', 'error');
+  
+  // Disable button & show loading
+  const btn = document.getElementById('submitBtn');
+  const originalBtnHTML = btn.innerHTML;
+  btn.innerHTML = '<span class="loading-spinner"></span> Verifying...';
+  btn.disabled = true;
+  isSubmitting = true;
+  
   try {
-    const r = await fetch(API + '/wallet/deposit-request', {
+    // Additional API call to ensure token hasn't been invalidated mid-flight
+    const response = await fetch(API + '/wallet/deposit-request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + token
       },
-      body: JSON.stringify({ utr, amount })
+      body: JSON.stringify({ utr: utrClean, amount: amountNum })
     });
-    const d = await r.json();
-    if(d.status === 'success') {
-      showMsg('✅ Request submitted! Admin will verify and add balance shortly.', 'success');
-      document.getElementById('utr').value = '';
-      document.getElementById('amount').value = '';
-    } else {
-      showMsg(d.message || 'Submission failed!', 'error');
+    
+    // Handle 401 Unauthorized specifically -> token expired/invalid
+    if (response.status === 401 || response.status === 403) {
+      clearInvalidTokenAndRedirect();
+      return;
     }
-  } catch(e) {
-    showMsg('Server error! Try again.', 'error');
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+      showMsg('✅ Request submitted! Admin will verify and add balance shortly.', 'success');
+      utrInput.value = '';
+      amountInput.value = '';
+      // Optionally trigger a small delay to reset UI
+    } else {
+      // Server error message handling (e.g. duplicate UTR, invalid reference)
+      let errorMsg = data.message || 'Submission failed!';
+      if (errorMsg.toLowerCase().includes('token') || errorMsg.toLowerCase().includes('unauthorized')) {
+        clearInvalidTokenAndRedirect();
+        return;
+      }
+      showMsg(errorMsg, 'error');
+    }
+  } catch (e) {
+    console.error('API error:', e);
+    // Network error handling: token might still be valid, but server unreachable.
+    if (e.name === 'TypeError' || e.message.includes('fetch')) {
+      showMsg('Network error! Check your connection and try again.', 'error');
+    } else {
+      showMsg('Server error! Try again later.', 'error');
+    }
+  } finally {
+    isSubmitting = false;
+    btn.innerHTML = originalBtnHTML;
+    btn.disabled = false;
   }
 }
+
+// Intercept all navigation links to perform token validation before leaving
+function setupSecureNavigation() {
+  const navLinks = [
+    { element: document.getElementById('backLink'), href: 'dashboard.html' },
+    { element: document.getElementById('navHome'), href: 'dashboard.html' },
+    { element: document.getElementById('navSend'), href: 'transfer.html' },
+    { element: document.getElementById('navWithdraw'), href: 'withdraw.html' },
+    { element: document.getElementById('navLifafa'), href: 'lifafa.html' }
+  ];
+  
+  // Also add any other potential .nav-item or .back not covered
+  navLinks.forEach(link => {
+    if (link.element) {
+      link.element.addEventListener('click', (e) => {
+        const token = getValidToken();
+        if (!token) {
+          e.preventDefault();
+          redirectToLogin('Please login to access this page.');
+        }
+        // If token exists but might be stale: we don't block navigation, but we rely on page protection
+        // However we can fire a background check? Not needed for UX.
+      });
+    }
+  });
+  
+  // Additional safety: protect "Add" page itself - if token missing, redirect immediately
+  if (!getValidToken()) {
+    redirectToLogin('Authentication required. Please login.');
+    return false;
+  }
+  return true;
+}
+
+// Main initialization with token verification
+async function initPage() {
+  // Check token presence first
+  const tokenExists = getValidToken();
+  if (!tokenExists) {
+    redirectToLogin('Please login to access Add Money page.');
+    return;
+  }
+  
+  // Show loading state msg temporarily while verifying?
+  const msgDiv = document.getElementById('msg');
+  msgDiv.style.display = 'none';
+  
+  // Verify token validity with backend (enhanced)
+  const isValid = await verifyTokenAndRedirect();
+  if (!isValid) return; // already redirected
+  
+  // After successful verification, attach navigation protections
+  setupSecureNavigation();
+  
+  // Additional: add auto logout on storage event (if token cleared from another tab)
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'token' && !event.newValue) {
+      redirectToLogin('Session terminated in another tab.');
+    }
+  });
+  
+  // Also handle manual removal: watch for visibility change (optional)
+}
+
+// Execute initialization
+initPage().catch(err => {
+  console.error('Init error', err);
+  // fallback redirect if something weird
+  if (!getValidToken()) redirectToLogin('Authentication error.');
+});
+
+// Make copyUPI and submitUTR globally available
+window.copyUPI = copyUPI;
+window.submitUTR = submitUTR;
+
+// Add an extra helper: if the user clicks on any internal link that not covered yet, safeguard
+document.addEventListener('click', (e) => {
+  let target = e.target.closest('a');
+  if (target && target.href && !target.href.startsWith('javascript:') && target.getAttribute('href') !== '#') {
+    const url = new URL(target.href);
+    // Only intercept same-origin links to dashboard/transfer/withdraw/lifafa type
+    if (url.origin === window.location.origin) {
+      const allowedPaths = ['dashboard.html', 'transfer.html', 'withdraw.html', 'lifafa.html', 'deposit.html'];
+      const pathname = url.pathname.split('/').pop();
+      if (allowedPaths.includes(pathname) && pathname !== 'deposit.html') {
+        const token = getValidToken();
+        if (!token) {
+          e.preventDefault();
+          redirectToLogin('Session missing. Please login.');
+        }
+      }
+    }
+  }
+});
 </script>
 </body>
-  </html>
+</html>
