@@ -7,82 +7,298 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-:root{
-  --nexo-primary:#0f172a;
-  --nexo-accent:#3b82f6;
-  --nexo-accent-dark:#2563eb;
-  --nexo-accent-light:#eff6ff;
-  --nexo-success:#10b981;
-  --nexo-error:#ef4444;
-  --nexo-warning:#f59e0b;
-  --nexo-bg:#f8fafc;
-  --nexo-white:#ffffff;
-  --nexo-text:#0f172a;
-  --nexo-muted:#64748b;
-  --nexo-border:#e2e8f0;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--nexo-bg);min-height:100vh;padding-bottom:80px}
 
-.header{background:var(--nexo-white);padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 0 var(--nexo-border);position:sticky;top:0;z-index:100}
-.back{width:36px;height:36px;background:var(--nexo-accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;color:var(--nexo-accent);transition:all 0.2s}
-.back:active{background:var(--nexo-accent);color:white}
-.header h1{font-size:1rem;font-weight:800;color:var(--nexo-text);text-transform:uppercase;letter-spacing:.05em}
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #f0f4ff;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
 
-.container{max-width:500px;margin:0 auto;padding:1.25rem}
-.card{background:var(--nexo-white);border-radius:1.75rem;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);margin-bottom:1.25rem;border:1px solid var(--nexo-border)}
+.header {
+  background: white;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
 
-.upi-box{background:linear-gradient(135deg,var(--nexo-accent),var(--nexo-accent-dark));border-radius:1.25rem;padding:1.5rem;color:white;text-align:center;margin-bottom:1.25rem}
-.upi-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:.5rem}
-.upi-id{font-size:1.1rem;font-weight:800;margin-bottom:.75rem;word-break:break-all;font-family:monospace}
-.copy-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:.5rem 1.25rem;border-radius:.75rem;font-size:.75rem;font-weight:700;cursor:pointer;transition:all 0.2s}
-.copy-btn:active{background:rgba(255,255,255,0.35)}
+.back {
+  width: 36px;
+  height: 36px;
+  background: #f8fafc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: #64748b;
+  transition: all 0.2s;
+}
+.back:active { background: #eef2ff; }
 
-.input-group{margin-bottom:1.25rem}
-.input-group label{display:block;font-size:.7rem;font-weight:800;color:var(--nexo-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;margin-left:.25rem}
-.input-group input{width:100%;padding:1rem 1.25rem;background:#f8fafc;border:2px solid var(--nexo-border);border-radius:1rem;font-size:.9rem;font-weight:600;outline:none;transition:all .2s;font-family:inherit}
-.input-group input:focus{border-color:var(--nexo-accent);background:white}
+.header h1 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
 
-.btn{width:100%;padding:1rem;background:var(--nexo-accent);color:white;border:none;border-radius:1rem;font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;transition:all .2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:.6rem}
-.btn:active{transform:scale(.98)}
-.btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
 
-.btn .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin 0.8s linear infinite;display:none}
-.btn.loading .spinner{display:inline-block}
-.btn.loading .btn-text{display:none}
+.card {
+  background: white;
+  border-radius: 1.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-bottom: 1.25rem;
+}
 
-.msg{padding:.75rem 1rem;border-radius:.75rem;font-size:.75rem;font-weight:700;text-align:center;margin-bottom:1rem;display:none}
-.msg.error{background:#fee2e2;color:var(--nexo-error);display:block}
-.msg.success{background:#dcfce7;color:var(--nexo-success);display:block}
-.msg.warning{background:#ffedd5;color:var(--nexo-warning);display:block}
+.upi-box {
+  background: linear-gradient(135deg, #0057ff, #0033cc);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  color: white;
+  text-align: center;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 8px 20px rgba(0,87,255,0.2);
+}
 
-.steps{margin-top:0}
-.step{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:1rem}
-.step-num{width:28px;height:28px;background:var(--nexo-accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:var(--nexo-accent);flex-shrink:0}
-.step-text{font-size:.75rem;font-weight:600;color:var(--nexo-muted);padding-top:.25rem}
-.step-text strong{color:var(--nexo-text);display:block;font-size:.8rem;margin-bottom:2px}
+.upi-label {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  opacity: .7;
+  margin-bottom: .5rem;
+}
 
-.note{background:#fff7ed;border:1px solid #fed7aa;border-radius:1rem;padding:1rem;font-size:.75rem;font-weight:600;color:var(--nexo-warning);margin-top:1rem}
+.upi-id {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: .75rem;
+  word-break: break-all;
+}
 
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(10px);border-top:1px solid var(--nexo-border);display:flex;justify-content:space-around;padding:.6rem 0 calc(.6rem + env(safe-area-inset-bottom));z-index:50}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--nexo-muted);font-size:.58rem;font-weight:800;text-transform:uppercase;cursor:pointer;text-decoration:none;flex:1;transition:color .2s}
-.nav-item.active{color:var(--nexo-accent)}
-.nav-item i{font-size:1.2rem}
-.nav-active-dot{width:4px;height:4px;background:var(--nexo-accent);border-radius:50%;margin-top:-2px;display:none}
-.nav-item.active .nav-active-dot{display:block}
+.copy-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  padding: .5rem 1.25rem;
+  border-radius: .75rem;
+  font-size: .75rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.copy-btn:active { background: rgba(255,255,255,0.35); }
 
-@keyframes spin{to{transform:rotate(360deg)}}
+.input-group {
+  margin-bottom: 1.25rem;
+}
+
+.input-group label {
+  display: block;
+  font-size: .7rem;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: .5rem;
+  margin-left: .25rem;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: #f8fafc;
+  border: 2px solid #f1f5f9;
+  border-radius: 1rem;
+  font-size: .9rem;
+  font-weight: 600;
+  outline: none;
+  transition: all .2s;
+  font-family: inherit;
+}
+
+.input-group input:focus {
+  border-color: #0057ff;
+  background: white;
+}
+
+.btn {
+  width: 100%;
+  padding: 1rem;
+  background: #0057ff;
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  font-size: .85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+  position: relative;
+}
+.btn:active { transform: scale(.98); }
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn .spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.msg {
+  padding: .75rem 1rem;
+  border-radius: .75rem;
+  font-size: .75rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+  display: none;
+}
+
+.msg.error {
+  background: #fee2e2;
+  color: #dc2626;
+  display: block;
+}
+
+.msg.success {
+  background: #dcfce7;
+  color: #16a34a;
+  display: block;
+}
+
+.msg.warning {
+  background: #ffedd5;
+  color: #ea580c;
+  display: block;
+}
+
+.steps { margin-top: 0; }
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  background: #eff6ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .7rem;
+  font-weight: 800;
+  color: #0057ff;
+  flex-shrink: 0;
+}
+
+.step-text {
+  font-size: .75rem;
+  font-weight: 600;
+  color: #64748b;
+  padding-top: .25rem;
+}
+
+.step-text strong {
+  color: #0f172a;
+  display: block;
+  font-size: .8rem;
+  margin-bottom: 2px;
+}
+
+.note {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 1rem;
+  padding: 1rem;
+  font-size: .75rem;
+  font-weight: 600;
+  color: #ea580c;
+  margin-top: 1rem;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-around;
+  padding: .6rem 0 calc(.6rem + env(safe-area-inset-bottom));
+  z-index: 50;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: #94a3b8;
+  font-size: .6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  flex: 1;
+  transition: color 0.2s;
+}
+
+.nav-item.active {
+  color: #0057ff;
+}
+
+.nav-item i {
+  font-size: 1.2rem;
+}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <a href="dashboard.html" class="back"><i class="fa-solid fa-arrow-left"></i></a>
+  <a href="dashboard.html" class="back" id="backLink"><i class="fa-solid fa-arrow-left"></i></a>
   <h1>Add Money</h1>
 </div>
 
 <div class="container">
 
+  <!-- UPI Info Card -->
   <div class="card">
     <div class="upi-box">
       <div class="upi-label">Pay to UPI ID</div>
@@ -92,17 +308,30 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--nexo-bg);min-he
       </button>
     </div>
 
-    <div style="font-size:.7rem;font-weight:800;color:var(--nexo-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem">How it works</div>
+    <div style="font-size:.7rem;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem">How it works</div>
     <div class="steps">
-      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>UPI se Pay karo</strong>Upar diye UPI ID pe payment karo</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>UTR Number note karo</strong>Payment ke baad 12 digit UTR milega</div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Neeche submit karo</strong>UTR aur amount fill karke submit karo</div></div>
-      <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Balance add hoga</strong>Admin verify karke balance add karega</div></div>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>UPI se Pay karo</strong>Upar diye UPI ID pe payment karo</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>UTR Number note karo</strong>Payment ke baad 12 digit UTR milega</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Neeche submit karo</strong>UTR aur amount fill karke submit karo</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Balance add hoga</strong>Admin verify karke balance add karega</div>
+      </div>
     </div>
   </div>
 
+  <!-- Submit UTR Form -->
   <div class="card">
-    <div style="font-size:.7rem;font-weight:800;color:var(--nexo-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1.25rem">
+    <div style="font-size:.7rem;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1.25rem">
       <i class="fa-solid fa-file-invoice"></i> Submit Payment Details
     </div>
 
@@ -110,17 +339,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--nexo-bg);min-he
 
     <div class="input-group">
       <label>UTR / Transaction Number</label>
-      <input type="text" id="utr" placeholder="Enter UTR number" maxlength="20" autocomplete="off">
+      <input type="text" id="utr" placeholder="Enter 12-digit UTR number" maxlength="20" autocomplete="off">
     </div>
 
     <div class="input-group">
       <label>Amount Paid (₹)</label>
-      <input type="number" id="amount" placeholder="Enter exact amount paid" step="1" autocomplete="off">
+      <input type="number" id="amount" placeholder="Enter exact amount paid" step="0.01" autocomplete="off">
     </div>
 
     <button class="btn" id="submitBtn">
-      <span class="spinner"></span>
-      <span class="btn-text"><i class="fa-solid fa-paper-plane"></i> Submit for Verification</span>
+      <i class="fa-solid fa-paper-plane"></i> Submit for Verification
     </button>
 
     <div class="note">
@@ -131,6 +359,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--nexo-bg);min-he
 
 </div>
 
+<!-- Bottom Nav -->
 <div class="bottom-nav">
   <a href="dashboard.html" class="nav-item" id="navHome"><i class="fa-solid fa-house"></i>Home</a>
   <a href="transfer.html" class="nav-item" id="navSend"><i class="fa-solid fa-paper-plane"></i>Send</a>
@@ -141,22 +370,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--nexo-bg);min-he
 
 <script>
 // ============================================================
-// NEXO ADD MONEY PAGE - Fully integrated with backend
-// API: https://nexo-waiiet.vercel.app
+// CORRECT SESSION CHECK - Works with your existing login system
 // ============================================================
 
 const API = 'https://nexo-waiiet.vercel.app';
 
-// Helper: Get token from localStorage
+// Simple token check - just reads from localStorage (same as dashboard)
 function getToken() {
-  const token = localStorage.getItem('token');
-  if (!token || token === 'null' || token === 'undefined' || token === '') {
-    return null;
-  }
-  return token;
+  return localStorage.getItem('token');
 }
 
-// Helper: Get user data
 function getUser() {
   try {
     const userStr = localStorage.getItem('user');
@@ -167,78 +390,73 @@ function getUser() {
   return null;
 }
 
-// Check authentication - redirect if not logged in
-function checkAuth() {
+// Session validation - only at page load
+function validateSession() {
   const token = getToken();
-  if (!token) {
+  const user = getUser();
+  
+  // If no token or no user, redirect to login
+  if (!token || !user) {
+    sessionStorage.setItem('auth_error', 'Session expired. Please login again.');
     window.location.href = 'index.html';
     return false;
   }
+  
   return true;
 }
 
-// Show message
+// Show message helper
 function showMessage(text, type) {
   const msgDiv = document.getElementById('msg');
   msgDiv.textContent = text;
   msgDiv.className = 'msg ' + type;
+  msgDiv.style.display = 'block';
   
   setTimeout(() => {
-    if (msgDiv.style.display !== 'none') {
+    if (msgDiv.style.display === 'block') {
       msgDiv.style.display = 'none';
       msgDiv.className = 'msg';
     }
   }, 5000);
 }
 
-// Copy UPI ID
 function copyUPI() {
   const upiText = 'sumitsharmaji001@ptyes';
   navigator.clipboard.writeText(upiText).then(() => {
     showMessage('✅ UPI ID Copied!', 'success');
   }).catch(() => {
-    // Fallback
-    const input = document.createElement('input');
-    input.value = upiText;
-    document.body.appendChild(input);
-    input.select();
+    // Fallback for older browsers
+    const textarea = document.createElement('textarea');
+    textarea.value = upiText;
+    document.body.appendChild(textarea);
+    textarea.select();
     document.execCommand('copy');
-    document.body.removeChild(input);
+    document.body.removeChild(textarea);
     showMessage('✅ UPI ID Copied!', 'success');
   });
 }
 
-// Button loading state
 let isSubmitting = false;
 
-function setButtonLoading(loading) {
-  const btn = document.getElementById('submitBtn');
-  if (loading) {
-    btn.classList.add('loading');
-    btn.disabled = true;
-  } else {
-    btn.classList.remove('loading');
-    btn.disabled = false;
-  }
-}
-
 // Submit deposit request
-async function submitDeposit() {
-  // Check auth
+async function handleSubmit() {
+  // Get token (same way as dashboard)
   const token = getToken();
-  if (!token) {
+  const user = getUser();
+  
+  if (!token || !user) {
     showMessage('❌ Session expired! Please login again.', 'error');
-    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 2000);
     return;
   }
   
-  // Prevent duplicate submission
   if (isSubmitting) {
     showMessage('⏳ Please wait, processing...', 'warning');
     return;
   }
   
-  // Get values
   const utrInput = document.getElementById('utr');
   const amountInput = document.getElementById('amount');
   const utr = utrInput.value.trim();
@@ -254,13 +472,13 @@ async function submitDeposit() {
     return;
   }
   if (utr.length < 6) {
-    showMessage('❌ UTR too short (minimum 6 characters)!', 'error');
+    showMessage('❌ UTR too short (min 6 characters)!', 'error');
     return;
   }
   
   const amountNum = parseFloat(amount);
   if (isNaN(amountNum) || amountNum < 1) {
-    showMessage('❌ Minimum amount ₹1 required!', 'error');
+    showMessage('❌ Minimum ₹1 required!', 'error');
     return;
   }
   if (amountNum > 500000) {
@@ -268,12 +486,15 @@ async function submitDeposit() {
     return;
   }
   
-  // Start submission
+  // Disable button and show loading
+  const btn = document.getElementById('submitBtn');
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span> Submitting...';
+  btn.disabled = true;
   isSubmitting = true;
-  setButtonLoading(true);
   
   try {
-    console.log('Submitting deposit request:', { utr, amount: amountNum });
+    console.log('Submitting deposit request with token:', token.substring(0, 20) + '...');
     
     const response = await fetch(`${API}/wallet/deposit-request`, {
       method: 'POST',
@@ -287,12 +508,16 @@ async function submitDeposit() {
       })
     });
     
-    // Handle 401/403 - token expired
+    console.log('Response status:', response.status);
+    
+    // Handle 401/403 - token invalid
     if (response.status === 401 || response.status === 403) {
       showMessage('❌ Session expired! Please login again.', 'error');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
       return;
     }
     
@@ -300,83 +525,92 @@ async function submitDeposit() {
     let data;
     try {
       data = await response.json();
-    } catch(e) {
-      console.error('Parse error:', e);
-      showMessage('❌ Server error. Please try again.', 'error');
+    } catch (e) {
+      console.error('Failed to parse response:', e);
+      showMessage('❌ Server returned invalid response. Please try again.', 'error');
       return;
     }
     
-    // Check success
+    // Check response
     if (data.status === 'success') {
-      showMessage('✅ Request submitted successfully! Admin will verify and add balance shortly.', 'success');
-      // Clear form
+      showMessage('✅ Request submitted! Admin will verify and add balance shortly.', 'success');
       utrInput.value = '';
       amountInput.value = '';
     } else {
-      // Show error from server
       const errorMsg = data.message || 'Submission failed! Please check your UTR and try again.';
       showMessage('❌ ' + errorMsg, 'error');
     }
     
   } catch (error) {
-    console.error('Network error:', error);
-    if (error.name === 'TypeError' || error.message === 'Failed to fetch') {
+    console.error('Network/API error:', error);
+    
+    if (error.name === 'TypeError' || error.message === 'Failed to fetch' || error.message.includes('network')) {
       showMessage('⚠️ Network error! Please check your internet connection and try again.', 'error');
     } else {
       showMessage('❌ Something went wrong. Please try again later.', 'error');
     }
+    
   } finally {
     isSubmitting = false;
-    setButtonLoading(false);
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
   }
 }
 
-// Update bottom nav active state
-function updateBottomNav() {
-  const currentPage = window.location.pathname.split('/').pop();
-  const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach(item => {
-    const href = item.getAttribute('href');
-    if (href === currentPage || (currentPage === 'deposit.html' && href === 'deposit.html')) {
-      item.classList.add('active');
-    } else {
-      item.classList.remove('active');
-    }
-  });
-}
-
-// Initialize page
-function init() {
-  // Check authentication
-  if (!checkAuth()) return;
+// Page initialization - validate session ONCE on page load
+function initPage() {
+  // First, validate session using the same method as dashboard
+  if (!validateSession()) {
+    return; // validateSession redirects if needed
+  }
   
-  // Set user info in UI (optional - for avatar)
+  // Display user info (same as dashboard)
   const user = getUser();
   if (user && user.name) {
-    const firstLetter = user.name.charAt(0).toUpperCase();
-    const avatarEl = document.querySelector('.avatar');
-    if (avatarEl) avatarEl.textContent = firstLetter;
+    console.log('Welcome back, ' + user.name);
   }
   
   // Attach submit handler
   const submitBtn = document.getElementById('submitBtn');
   if (submitBtn) {
-    // Remove existing listeners by cloning
+    // Remove existing listeners and add new one
     const newBtn = submitBtn.cloneNode(true);
     submitBtn.parentNode.replaceChild(newBtn, submitBtn);
-    newBtn.addEventListener('click', submitDeposit);
+    newBtn.addEventListener('click', handleSubmit);
   }
   
-  // Update bottom nav
-  updateBottomNav();
+  // Setup navigation protection
+  const navLinks = ['backLink', 'navHome', 'navSend', 'navWithdraw', 'navLifafa'];
+  navLinks.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.tagName === 'A') {
+      el.addEventListener('click', (e) => {
+        const token = getToken();
+        if (!token) {
+          e.preventDefault();
+          window.location.href = 'index.html';
+        }
+      });
+    }
+  });
+  
+  // Listen for token changes from other tabs
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'token' && !event.newValue) {
+      showMessage('⚠️ Session ended in another tab. Please login again.', 'warning');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
+    }
+  });
 }
 
 // Start the app
-init();
+initPage();
 
-// Make functions global for onclick
+// Expose functions globally
 window.copyUPI = copyUPI;
-window.submitDeposit = submitDeposit;
+window.handleSubmit = handleSubmit;
 </script>
 </body>
 </html>
