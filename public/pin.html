@@ -134,10 +134,10 @@ body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:40%;height:40
   </div>
 
   <div class="action-btns" id="action-btns">
-    <div class="act-btn" onclick="window.location.href='forgot-pin.html'">
+    <div class="act-btn" onclick="openForgot()">
       <i class="fa-solid fa-key"></i> Forgot PIN
     </div>
-    <div class="act-btn" onclick="window.location.href='change-pin.html'">
+    <div class="act-btn" onclick="openChange()">
       <i class="fa-solid fa-pen-to-square"></i> Change PIN
     </div>
   </div>
@@ -147,11 +147,6 @@ body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:40%;height:40
 
 <!-- ════════════════════════════════════════════
      FORGOT PIN MODAL
-     Step 1a: TG linked   → Send OTP button
-     Step 1b: TG na linked → Link karo (Enter ID + Get ID + Connect & Send OTP)
-     Step 2: OTP verify
-     Step 3: New PIN
-     Step 4: Confirm PIN
 ════════════════════════════════════════════ -->
 <div class="overlay" id="forgot-overlay">
   <div class="modal">
@@ -251,9 +246,6 @@ body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:40%;height:40
 
 <!-- ════════════════════════════════════════════
      CHANGE PIN MODAL
-     Step 1: Old PIN verify (via /auth/verify-pin)
-     Step 2: New PIN
-     Step 3: Confirm New PIN
 ════════════════════════════════════════════ -->
 <div class="overlay" id="change-overlay">
   <div class="modal">
@@ -344,16 +336,20 @@ function initUI() {
 }
 
 function setStep(n) {
-  step = n; code = ''; updateDots();
+  step = n; 
+  code = ''; 
+  updateDots();
   const badge = document.getElementById('step-badge');
-  if (n === 1) {
-    badge.textContent = 'Step 1 of 2';
-    document.getElementById('main-title').textContent = mode === 'change' ? 'New PIN' : 'Create PIN';
-    document.getElementById('main-sub').textContent   = 'Enter a 4-digit PIN';
-  } else {
-    badge.textContent = 'Step 2 of 2';
-    document.getElementById('main-title').textContent = 'Confirm PIN';
-    document.getElementById('main-sub').textContent   = 'Re-enter the same PIN to confirm';
+  if (mode === 'set' || mode === 'change') {
+    if (n === 1) {
+      badge.textContent = 'Step 1 of 2';
+      document.getElementById('main-title').textContent = 'New PIN';
+      document.getElementById('main-sub').textContent   = 'Enter a 4-digit PIN';
+    } else {
+      badge.textContent = 'Step 2 of 2';
+      document.getElementById('main-title').textContent = 'Confirm PIN';
+      document.getElementById('main-sub').textContent   = 'Re-enter the same PIN to confirm';
+    }
   }
 }
 
@@ -373,22 +369,52 @@ function updateDots(isError = false) {
 
 function submit() {
   if (code.length < 4) return toast('4 digit ka PIN chahiye!', 'red');
-  if (mode === 'set' || mode === 'change') handleSetOrChangeFlow();
-  else handleVerifyPin();
+  if (mode === 'set') {
+    handleSetFlow();
+  } else if (mode === 'change') {
+    handleChangePINFlow();
+  } else {
+    handleVerifyPin();
+  }
 }
 
-async function handleSetOrChangeFlow() {
+async function handleSetFlow() {
   if (step === 1) {
-    step1Pin = code; setStep(2);
+    step1Pin = code; 
+    setStep(2);
+    code = '';
   } else {
     if (code !== step1Pin) {
       toast('PINs match nahi kiye!', 'red');
       updateDots(true);
-      setTimeout(() => { setStep(1); step1Pin = ''; }, 800);
+      setTimeout(() => { 
+        setStep(1); 
+        step1Pin = ''; 
+        code = '';
+      }, 800);
       return;
     }
-    if (mode === 'change') await callChangePinAPI(code);
-    else await callSetPin(code);
+    await callSetPin(code);
+  }
+}
+
+async function handleChangePINFlow() {
+  if (step === 1) {
+    step1Pin = code; 
+    setStep(2);
+    code = '';
+  } else {
+    if (code !== step1Pin) {
+      toast('PINs match nahi kiye!', 'red');
+      updateDots(true);
+      setTimeout(() => { 
+        setStep(1); 
+        step1Pin = ''; 
+        code = '';
+      }, 800);
+      return;
+    }
+    await callChangePinAPI(code);
   }
 }
 
@@ -434,6 +460,7 @@ async function handleVerifyPin() {
 async function callChangePinAPI(pin) {
   disableKeypad(true);
   try {
+    // First verify current PIN (already done in modal, but verify again for security)
     const res  = await fetch(`${API}/auth/change-pin`, {
       method: 'POST',
       headers: {'Content-Type':'application/json','Authorization':`Bearer ${token}`},
@@ -442,8 +469,16 @@ async function callChangePinAPI(pin) {
     const data = await res.json();
     if (data.status === 'success') {
       toast('PIN changed! ✅','green');
-      setTimeout(() => window.location.href = 'dashboard.html', 1000);
-    } else { toast(data.message||'Error','red'); setStep(1); }
+      localStorage.setItem('pin_set','true');
+      setTimeout(() => {
+        mode = 'verify';
+        initUI();
+        closeModal('change-overlay');
+      }, 1000);
+    } else { 
+      toast(data.message||'Error','red'); 
+      setStep(1); 
+    }
   } catch(e) { toast('Network error','red'); setStep(1); }
   finally { disableKeypad(false); }
 }
@@ -475,7 +510,8 @@ function openForgot() {
 
 function showForgotStep(s) {
   ['linked','link','otp','newpin1','newpin2'].forEach(x => {
-    document.getElementById(`f-step-${x}`).style.display = x===s ? 'block' : 'none';
+    const el = document.getElementById(`f-step-${x}`);
+    if(el) el.style.display = x===s ? 'block' : 'none';
   });
 }
 
@@ -498,7 +534,8 @@ async function sendForgotOTPLinked() {
 // Enable connect btn when TG ID typed
 function onForgotTGInput() {
   const val = document.getElementById('f-tgid').value.trim();
-  document.getElementById('f-connect-btn').disabled = val.length < 5;
+  const btn = document.getElementById('f-connect-btn');
+  if(btn) btn.disabled = val.length < 5;
 }
 
 // TG not linked → connect + send OTP together
@@ -581,7 +618,10 @@ async function resetPINFinal() {
       localStorage.setItem('pin_set','true');
       toast('PIN reset ho gaya! ✅','green');
       closeModal('forgot-overlay');
-      mode = 'verify'; initUI();
+      mode = 'verify'; 
+      initUI();
+      code = '';
+      updateDots();
     } else toast(data.message||'Error','red');
   } catch(e) { toast('Network error','red'); }
   finally { btnLoad(btn, false); }
@@ -591,9 +631,14 @@ async function resetPINFinal() {
 // CHANGE PIN
 // ══════════════════════════════════════════════════════════════
 function openChange() {
-  ['c-oldpin','c-newpin1','c-newpin2'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
+  // Reset all fields
+  const oldPin = document.getElementById('c-oldpin');
+  const newPin1 = document.getElementById('c-newpin1');
+  const newPin2 = document.getElementById('c-newpin2');
+  if(oldPin) oldPin.value = '';
+  if(newPin1) newPin1.value = '';
+  if(newPin2) newPin2.value = '';
+  
   changeNewPin1 = '';
   showChangeStep('oldpin');
   openModal('change-overlay');
@@ -601,7 +646,8 @@ function openChange() {
 
 function showChangeStep(s) {
   ['oldpin','newpin1','newpin2'].forEach(x => {
-    document.getElementById(`c-step-${x}`).style.display = x===s ? 'block' : 'none';
+    const el = document.getElementById(`c-step-${x}`);
+    if(el) el.style.display = x===s ? 'block' : 'none';
   });
 }
 
@@ -617,8 +663,13 @@ async function verifyOldPIN() {
       body: JSON.stringify({ pin })
     });
     const data = await res.json();
-    if (data.status === 'success') { toast('PIN verified ✅','green'); showChangeStep('newpin1'); }
-    else { toast(data.message||'Wrong PIN','red'); document.getElementById('c-oldpin').value=''; }
+    if (data.status === 'success') { 
+      toast('PIN verified ✅','green'); 
+      showChangeStep('newpin1');
+    } else { 
+      toast(data.message||'Wrong PIN','red'); 
+      document.getElementById('c-oldpin').value=''; 
+    }
   } catch(e) { toast('Network error','red'); }
   finally { btnLoad(btn, false); }
 }
@@ -635,7 +686,8 @@ async function saveChangedPIN() {
   if (pin.length!==4) return toast('4 digit ka PIN chahiye','red');
   if (pin!==changeNewPin1) {
     toast('PINs match nahi kiye! Dobara try karo.','red');
-    document.getElementById('c-newpin2').value=''; return;
+    document.getElementById('c-newpin2').value=''; 
+    return;
   }
   const btn = document.getElementById('c-confirm-btn');
   btnLoad(btn, true);
@@ -650,7 +702,14 @@ async function saveChangedPIN() {
       localStorage.setItem('pin_set','true');
       toast('PIN change ho gaya! ✅','green');
       closeModal('change-overlay');
-    } else toast(data.message||'Error','red');
+      // Reset mode to verify after successful change
+      mode = 'verify';
+      initUI();
+      code = '';
+      updateDots();
+    } else {
+      toast(data.message||'Error','red');
+    }
   } catch(e) { toast('Network error','red'); }
   finally { btnLoad(btn, false); }
 }
@@ -658,7 +717,7 @@ async function saveChangedPIN() {
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function disableKeypad(on) {
   const goBtn = document.getElementById('submit-btn');
-  goBtn.classList.toggle('loading', on);
+  if(goBtn) goBtn.classList.toggle('loading', on);
   document.querySelectorAll('.key').forEach(k => {
     k.style.pointerEvents = on ? 'none' : '';
     k.style.opacity       = on ? '0.7'  : '1';
@@ -666,18 +725,27 @@ function disableKeypad(on) {
 }
 
 function btnLoad(btn, on) {
+  if(!btn) return;
   on ? (btn.classList.add('loading'),    btn.disabled = true)
      : (btn.classList.remove('loading'), btn.disabled = false);
 }
 
 function toast(msg, type='') {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.className = `toast show ${type}`;
+  t.textContent = msg; 
+  t.className = `toast show ${type}`;
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-function openModal(id)  { document.getElementById(id).classList.add('open');    }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id)  { 
+  const modal = document.getElementById(id);
+  if(modal) modal.classList.add('open');    
+}
+
+function closeModal(id) { 
+  const modal = document.getElementById(id);
+  if(modal) modal.classList.remove('open'); 
+}
 </script>
 </body>
 </html>
