@@ -366,167 +366,42 @@ body {
 </div>
 
 <script>
-// CONFIGURATION
-const API = 'https://nexo-waiiet.vercel.app/';
-let sessionWarningShown = false; // Prevent multiple warning banners
-let tokenVerified = false; // Track if we've already verified token successfully
+// ============================================================
+// FIXED: NO AUTOMATIC NETWORK CHECKS, NO SPONTANEOUS WARNINGS
+// The page will NEVER show "Network issue" or redirect on load
+// Token is ONLY verified when user actually clicks SUBMIT
+// ============================================================
 
-// Helper: get token
-function getValidToken() {
+const API = 'https://nexo-waiiet.vercel.app/';
+
+// Helper: get token from localStorage
+function getToken() {
   const token = localStorage.getItem('token');
-  if (!token || token === 'null' || token === 'undefined' || token === '') return null;
+  if (!token || token === 'null' || token === 'undefined' || token === '') {
+    return null;
+  }
   return token;
 }
 
-// Get current user
-function getCurrentUser() {
-  try {
-    const userStr = localStorage.getItem('user');
-    if (userStr && userStr !== 'null' && userStr !== 'undefined') {
-      return JSON.parse(userStr);
-    }
-  } catch(e) {}
-  return null;
+// Helper: check if user is logged in (just token presence)
+function isLoggedIn() {
+  return getToken() !== null;
 }
 
-// Silent token check - doesn't show warnings, just returns boolean
-async function silentTokenCheck() {
-  const token = getValidToken();
-  if (!token) return false;
-  
-  try {
-    const response = await fetch(API + '/auth/me', {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (response.ok) return true;
-    if (response.status === 401 || response.status === 403) return false;
-    return true; // For other errors, assume token might still work
-  } catch (err) {
-    // Network error during silent check - don't bug user, assume token is fine
-    console.log('Silent token check network issue, assuming valid:', err.message);
-    return true;
-  }
-}
-
-// Critical token check - only called when necessary (before submission or on page load)
-async function criticalTokenCheck(showWarningOnFailure = true) {
-  const token = getValidToken();
-  if (!token) {
-    if (showWarningOnFailure) redirectToLogin('Session expired. Please login again.');
-    return false;
-  }
-  
-  try {
-    const response = await fetch(API + '/auth/me', {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      if (data.status === 'success') return true;
-      return false;
-    }
-    
-    if (response.status === 401 || response.status === 403) {
-      if (showWarningOnFailure) clearInvalidTokenAndRedirect();
-      return false;
-    }
-    
-    return true; // Server error but token might still be valid
-  } catch (err) {
-    // Network error during critical check - show different message
-    console.warn('Token verification network error:', err);
-    if (showWarningOnFailure) {
-      showNetworkWarning("Network issue - Please check your connection and try again.");
-    }
-    return true; // Don't block user due to network issues, let them try submission
-  }
-}
-
-function clearInvalidTokenAndRedirect() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  redirectToLogin('Your session has expired. Please login again.');
-}
-
+// Redirect to login page (only called when necessary)
 function redirectToLogin(message) {
-  sessionStorage.setItem('auth_error', message);
+  sessionStorage.setItem('auth_error', message || 'Please login to continue');
   window.location.href = 'index.html';
 }
 
-// Show temporary network warning (not a persistent session error)
-function showNetworkWarning(msg) {
-  const existingWarnings = document.querySelectorAll('.network-toast');
-  existingWarnings.forEach(w => w.remove());
-  
-  const toast = document.createElement('div');
-  toast.className = 'network-toast';
-  toast.style.cssText = 'position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#f59e0b; color:white; padding:0.6rem 1.2rem; border-radius:2rem; font-size:0.7rem; font-weight:600; z-index:200; box-shadow:0 4px 12px rgba(0,0,0,0.15); backdrop-filter:blur(4px); white-space:nowrap;';
-  toast.innerHTML = `<i class="fa-solid fa-wifi"></i> ${msg}`;
-  document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    if (toast && toast.remove) toast.remove();
-  }, 4000);
+// Clean logout and redirect
+function logoutAndRedirect() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  redirectToLogin('Session expired. Please login again.');
 }
 
-// Show session warning only when token is actually invalid
-function showSessionWarningIfNeeded() {
-  if (sessionWarningShown) return;
-  
-  const token = getValidToken();
-  if (!token) {
-    sessionWarningShown = true;
-    const banner = createSessionBanner('Session not found. Please login to continue.');
-    document.body.appendChild(banner);
-    return;
-  }
-  
-  // Only show if token is clearly invalid after background check
-  silentTokenCheck().then(isValid => {
-    if (!isValid && !sessionWarningShown) {
-      sessionWarningShown = true;
-      const banner = createSessionBanner('Your session has expired. Please login again.');
-      document.body.appendChild(banner);
-    }
-  }).catch(() => {
-    // Don't show banner on network errors
-  });
-}
-
-function createSessionBanner(message) {
-  const banner = document.createElement('div');
-  banner.className = 'session-banner';
-  banner.style.cssText = 'position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1e293b; color:white; padding:0.7rem 1.2rem; border-radius:2rem; font-size:0.7rem; font-weight:600; display:flex; align-items:center; gap:0.75rem; z-index:200; box-shadow:0 8px 20px rgba(0,0,0,0.2); backdrop-filter:blur(4px);';
-  banner.innerHTML = `<i class="fa-solid fa-shield-haltered"></i> ${message} <a href="index.html" style="color:#ffb347; text-decoration:underline; margin-left:0.25rem;">Login Now</a>`;
-  
-  const loginLink = banner.querySelector('a');
-  if (loginLink) {
-    loginLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = 'index.html';
-    });
-  }
-  
-  // Auto remove after 10 seconds
-  setTimeout(() => {
-    if (banner && banner.remove) banner.remove();
-  }, 10000);
-  
-  return banner;
-}
-
+// Copy UPI ID
 function copyUPI() {
   const upiText = 'sumitsharmaji001@ptyes';
   navigator.clipboard.writeText(upiText).then(() => {
@@ -536,24 +411,27 @@ function copyUPI() {
   });
 }
 
+// Show message helper
 function showMsg(text, type) {
-  const m = document.getElementById('msg');
-  m.textContent = text;
-  m.className = 'msg ' + type;
-  m.style.display = 'block';
+  const msgDiv = document.getElementById('msg');
+  msgDiv.textContent = text;
+  msgDiv.className = 'msg ' + type;
+  msgDiv.style.display = 'block';
   
   setTimeout(() => {
-    if (m.style.display === 'block') {
-      m.style.display = 'none';
-      m.className = 'msg';
+    if (msgDiv.style.display === 'block') {
+      msgDiv.style.display = 'none';
+      msgDiv.className = 'msg';
     }
   }, 5000);
 }
 
 let isSubmitting = false;
 
+// Submit UTR - THIS IS THE ONLY PLACE WHERE TOKEN IS VERIFIED
 async function submitUTR() {
-  const token = getValidToken();
+  // Check token exists before anything
+  const token = getToken();
   if (!token) {
     redirectToLogin('Please login to submit payment details.');
     return;
@@ -569,70 +447,88 @@ async function submitUTR() {
   const utr = utrInput.value.trim();
   const amount = amountInput.value;
   
-  if (!utr) return showMsg('UTR number required!', 'error');
-  if (!amount) return showMsg('Amount required!', 'error');
-  if (utr.length < 6) return showMsg('UTR too short (min 6 characters)!', 'error');
+  // Validate inputs
+  if (!utr) {
+    showMsg('UTR number required!', 'error');
+    return;
+  }
+  if (!amount) {
+    showMsg('Amount required!', 'error');
+    return;
+  }
+  if (utr.length < 6) {
+    showMsg('UTR too short (min 6 characters)!', 'error');
+    return;
+  }
+  
   const amountNum = parseFloat(amount);
-  if (isNaN(amountNum) || amountNum < 1) return showMsg('Minimum ₹1 required!', 'error');
-  if (amountNum > 500000) return showMsg('Amount exceeds limit (₹5,00,000 max)', 'error');
+  if (isNaN(amountNum) || amountNum < 1) {
+    showMsg('Minimum ₹1 required!', 'error');
+    return;
+  }
+  if (amountNum > 500000) {
+    showMsg('Amount exceeds limit (₹5,00,000 max)', 'error');
+    return;
+  }
   
-  // Critical: verify token before submission (only on submission, not on page load)
-  const isTokenValid = await criticalTokenCheck(true);
-  if (!isTokenValid) return;
-  
+  // Disable button and show loading
   const btn = document.getElementById('submitBtn');
-  const originalBtnHTML = btn.innerHTML;
-  btn.innerHTML = '<span class="loading-spinner"></span> Verifying...';
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '<span class="loading-spinner"></span> Submitting...';
   btn.disabled = true;
   isSubmitting = true;
   
   try {
+    // Make API call to submit deposit request
     const response = await fetch(API + '/wallet/deposit-request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + token
       },
-      body: JSON.stringify({ utr: utr.trim(), amount: amountNum })
+      body: JSON.stringify({ 
+        utr: utr.trim(), 
+        amount: amountNum 
+      })
     });
     
+    // Handle 401/403 - token invalid
     if (response.status === 401 || response.status === 403) {
-      clearInvalidTokenAndRedirect();
+      logoutAndRedirect();
       return;
     }
     
+    // Parse response
     const data = await response.json();
+    
     if (data.status === 'success') {
       showMsg('✅ Request submitted! Admin will verify and add balance shortly.', 'success');
       utrInput.value = '';
       amountInput.value = '';
     } else {
-      let errorMsg = data.message || 'Submission failed!';
-      if (errorMsg.toLowerCase().includes('token') || errorMsg.toLowerCase().includes('unauthorized')) {
-        clearInvalidTokenAndRedirect();
-        return;
-      }
+      // Show error message from server
+      const errorMsg = data.message || 'Submission failed! Please try again.';
       showMsg(errorMsg, 'error');
     }
-  } catch (e) {
-    console.error('API error:', e);
-    if (e.name === 'TypeError' || e.message.includes('fetch')) {
-      showMsg('Network error! Check your connection and try again.', 'error');
+    
+  } catch (error) {
+    console.error('Submission error:', error);
+    // Network error handling - only show if fetch fails
+    if (error.name === 'TypeError' || error.message === 'Failed to fetch' || error.message.includes('network')) {
+      showMsg('⚠️ Network error! Please check your internet connection and try again.', 'error');
     } else {
-      showMsg('Server error! Try again later.', 'error');
+      showMsg('Something went wrong. Please try again later.', 'error');
     }
   } finally {
     isSubmitting = false;
-    btn.innerHTML = originalBtnHTML;
+    btn.innerHTML = originalHTML;
     btn.disabled = false;
   }
 }
 
-// Navigation protection - only check token presence, not network verification
-function setupSecureNavigation() {
-  const protectedPages = ['dashboard.html', 'transfer.html', 'withdraw.html', 'lifafa.html'];
-  
-  const navElements = [
+// Navigation protection - simple token presence check only
+function setupNavigation() {
+  const protectedLinks = [
     document.getElementById('backLink'),
     document.getElementById('navHome'),
     document.getElementById('navSend'),
@@ -640,100 +536,109 @@ function setupSecureNavigation() {
     document.getElementById('navLifafa')
   ];
   
-  navElements.forEach(el => {
-    if (el && el.tagName === 'A') {
-      el.addEventListener('click', (e) => {
-        const href = el.getAttribute('href');
-        if (href && protectedPages.some(page => href.includes(page))) {
-          const token = getValidToken();
-          if (!token) {
-            e.preventDefault();
-            redirectToLogin('Please login to access this page.');
-          }
+  protectedLinks.forEach(link => {
+    if (link && link.tagName === 'A') {
+      link.addEventListener('click', (e) => {
+        // Only prevent if token is completely missing
+        if (!isLoggedIn()) {
+          e.preventDefault();
+          redirectToLogin('Please login to access this page.');
         }
       });
     }
   });
 }
 
-// Initialize page - SILENT token check (no annoying banners)
-async function initPage() {
-  const token = getValidToken();
-  if (!token) {
+// ============================================================
+// PAGE INITIALIZATION - NO NETWORK CALLS, NO WARNINGS, NO REDIRECTS
+// ============================================================
+function initPage() {
+  // Check if user is logged in (just token presence)
+  if (!isLoggedIn()) {
+    // User not logged in - redirect immediately
     redirectToLogin('Please login to access Add Money page.');
     return;
   }
   
-  // Do a silent background check - don't show any warnings to user
-  // This ensures we don't spam the "Network issue" message
+  // IMPORTANT: We DO NOT make any /auth/me or token validation API calls here
+  // This prevents all "Network issue" warnings and unwanted redirects
+  // The token will be validated only when user submits the form
+  
+  // Setup navigation protection
+  setupNavigation();
+  
+  // Optional: Display user name if available (no API call)
   try {
-    const response = await fetch(API + '/auth/me', {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json'
+    const userStr = localStorage.getItem('user');
+    if (userStr && userStr !== 'null') {
+      const user = JSON.parse(userStr);
+      if (user && user.name) {
+        // Just for console, no UI changes needed
+        console.log('Logged in as:', user.name);
       }
-    });
-    
-    if (response.status === 401 || response.status === 403) {
-      clearInvalidTokenAndRedirect();
-      return;
     }
-    
-    // Even if network fails, we don't show warning - let user try submission
-    // Only on actual 401/403 we redirect
-  } catch (err) {
-    // Network error during page load - completely silent, don't annoy user
-    console.log('Background token check skipped due to network:', err.message);
-    // Page still works, submission will check again
+  } catch(e) {
+    // Ignore parse errors
   }
   
-  // Set up navigation protection
-  setupSecureNavigation();
-  
-  // Listen for token changes from other tabs
+  // Listen for token removal from other tabs
   window.addEventListener('storage', (event) => {
     if (event.key === 'token' && !event.newValue) {
+      // Token removed in another tab - redirect
       redirectToLogin('Session terminated in another tab.');
     }
   });
-  
-  // Optional: prefill user info if needed (no warnings)
-  const user = getCurrentUser();
-  if (user && user.name) {
-    // Just for UX, no action needed
-  }
 }
 
-// Start the app - no banners on load
-initPage().catch(err => {
-  console.error('Init error:', err);
-  // Only redirect if token is definitely missing
-  if (!getValidToken()) {
-    redirectToLogin('Authentication required.');
-  }
-});
+// Global click handler for any other internal links
+function setupGlobalLinkProtection() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (!link) return;
+    if (!link.href || link.href.startsWith('javascript:')) return;
+    
+    try {
+      const url = new URL(link.href, window.location.href);
+      // Only protect same-origin links to main pages
+      if (url.origin === window.location.origin) {
+        const path = url.pathname.split('/').pop();
+        const protectedPaths = ['dashboard.html', 'transfer.html', 'withdraw.html', 'lifafa.html', 'deposit.html'];
+        
+        if (protectedPaths.includes(path) && path !== 'deposit.html') {
+          if (!isLoggedIn()) {
+            e.preventDefault();
+            redirectToLogin('Please login to continue.');
+          }
+        }
+      }
+    } catch(e) {
+      // Invalid URL, ignore
+    }
+  });
+}
 
-// Expose global functions
+// Start the app - absolutely NO automatic API calls
+initPage();
+setupGlobalLinkProtection();
+
+// Expose functions globally
 window.copyUPI = copyUPI;
 window.submitUTR = submitUTR;
 
-// Extra protection for all internal links
-document.addEventListener('click', (e) => {
-  const target = e.target.closest('a');
-  if (target && target.href && !target.href.startsWith('javascript:')) {
-    const url = new URL(target.href, window.location.href);
-    if (url.origin === window.location.origin) {
-      const pathname = url.pathname.split('/').pop();
-      const protectedPaths = ['dashboard.html', 'transfer.html', 'withdraw.html', 'lifafa.html', 'deposit.html'];
-      if (protectedPaths.includes(pathname) && pathname !== 'deposit.html') {
-        const token = getValidToken();
-        if (!token) {
-          e.preventDefault();
-          redirectToLogin('Please login to continue.');
-        }
-      }
-    }
+// ============================================================
+// ADDITIONAL FIX: Remove any existing session banners that might
+// have been left from previous page versions
+// ============================================================
+function cleanupOldBanners() {
+  const oldBanners = document.querySelectorAll('.session-banner, .network-toast');
+  oldBanners.forEach(banner => banner.remove());
+}
+cleanupOldBanners();
+
+// Also run cleanup when page becomes visible again
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    cleanupOldBanners();
   }
 });
 </script>
