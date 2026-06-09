@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Nexo Admin | Complete Control Panel</title>
+<title>UNIO Admin | Secure Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -511,7 +511,6 @@ body {
   font-size: .9rem;
   font-weight: 900;
   color: #0057ff;
-  font-family: monospace;
 }
 
 .empty {
@@ -554,7 +553,7 @@ body {
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">
-      <h1>NEXO</h1>
+      <h1>UNIO</h1>
       <p>Admin Panel</p>
     </div>
     <div class="login-err" id="login-err">❌ Invalid Access Code</div>
@@ -566,7 +565,7 @@ body {
 <!-- MAIN DASHBOARD -->
 <div id="dashboard">
   <div class="top-bar">
-    <h1><i class="fa-solid fa-shield-haltered"></i> NEXO Admin</h1>
+    <h1><i class="fa-solid fa-shield-haltered"></i> UNIO Admin</h1>
     <button class="logout-btn" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
   </div>
   <div class="container">
@@ -636,147 +635,20 @@ body {
 
 <script>
 // ======================== CONFIGURATION ========================
-const ADMIN_KEY = '2486';
-const API = '';  // Set your backend URL or leave empty for mock demo
+// SET YOUR BACKEND API BASE URL HERE (empty = mock mode for demo)
+const API = '';   // example: 'https://your-backend.com/api' or '' for local mock
 
-// In-memory storage for user balances (simulates database persistence)
-// This ensures balance updates persist during the session
-let mockUsers = [
-  { _id: '1', name: 'Rajesh Kumar', mobile: '9876543210', balance: 12500 },
-  { _id: '2', name: 'Priya Sharma', mobile: '9988776655', balance: 3400 },
-  { _id: '3', name: 'Amit Verma', mobile: '9123456789', balance: 780 }
-];
+const ADMIN_KEY = '8435';
 
-let mockTransactions = [
-  { _id: 'tx1', type: 'deposit', amount: 500, status: 'completed', remark: 'UTR:1234567890', receiver_id: { name: 'Rajesh', mobile: '9876543210' }, sender_id: null, tx_time: new Date().toISOString() },
-  { _id: 'tx2', type: 'withdraw', amount: 200, status: 'completed', remark: 'UPI:raj@okhdfc', sender_id: { name: 'Priya', mobile: '9988776655' }, receiver_id: null, tx_time: new Date(Date.now() - 86400000).toISOString() }
-];
-
-let mockWithdrawals = [
-  { _id: 'wd1', tx_id: 'W123', amount: 1500, status: 'pending', remark: 'user@okicici', sender_id: { name: 'Amit Verma', mobile: '9123456789' }, tx_time: new Date().toISOString() }
-];
-
-// Helper functions
+// Helper headers for admin requests
 function adminHeaders() {
-  return { 'x-admin-key': ADMIN_KEY, 'Content-Type': 'application/json' };
+  return {
+    'x-admin-key': ADMIN_KEY,
+    'Content-Type': 'application/json'
+  };
 }
 
-// Mock API handler with persistent state
-async function apiRequest(endpoint, options = {}) {
-  const url = API ? `${API}${endpoint}` : endpoint;
-  
-  if (!API) {
-    // Mock implementation with persistent data
-    if (options.method === 'GET') {
-      if (endpoint === '/admin/stats') {
-        const totalBal = mockUsers.reduce((sum, u) => sum + u.balance, 0);
-        return { status: 'success', users: mockUsers.length, transactions: mockTransactions.filter(t => t.status === 'completed').length, total_balance: totalBal, api_volume: 67250 };
-      }
-      if (endpoint === '/admin/users') return { status: 'success', users: mockUsers };
-      if (endpoint === '/admin/transactions') return { status: 'success', transactions: mockTransactions };
-      if (endpoint === '/admin/withdrawals') return { status: 'success', withdrawals: mockWithdrawals.filter(w => w.status === 'pending') };
-    }
-    
-    if (options.method === 'POST') {
-      const body = JSON.parse(options.body || '{}');
-      
-      if (endpoint === '/admin/add-balance') {
-        const user = mockUsers.find(u => u.mobile === body.mobile);
-        if (!user) return { status: 'error', message: 'User not found' };
-        const oldBalance = user.balance;
-        user.balance += parseFloat(body.amount);
-        
-        // Create transaction record
-        const newTx = {
-          _id: 'tx_' + Date.now(),
-          type: 'deposit',
-          amount: parseFloat(body.amount),
-          status: 'completed',
-          remark: 'Admin Credit',
-          receiver_id: { name: user.name, mobile: user.mobile },
-          sender_id: null,
-          tx_time: new Date().toISOString()
-        };
-        mockTransactions.unshift(newTx);
-        
-        return { status: 'success', new_balance: user.balance, message: `Added ₹${body.amount}` };
-      }
-      
-      if (endpoint === '/admin/deduct-balance') {
-        const user = mockUsers.find(u => u.mobile === body.mobile);
-        if (!user) return { status: 'error', message: 'User not found' };
-        if (user.balance < parseFloat(body.amount)) return { status: 'error', message: 'Insufficient balance' };
-        user.balance -= parseFloat(body.amount);
-        
-        const newTx = {
-          _id: 'tx_' + Date.now(),
-          type: 'withdraw',
-          amount: parseFloat(body.amount),
-          status: 'completed',
-          remark: 'Admin Debit',
-          sender_id: { name: user.name, mobile: user.mobile },
-          receiver_id: null,
-          tx_time: new Date().toISOString()
-        };
-        mockTransactions.unshift(newTx);
-        
-        return { status: 'success', new_balance: user.balance, message: `Deducted ₹${body.amount}` };
-      }
-      
-      if (endpoint.includes('/admin/approve-withdraw')) {
-        const txId = endpoint.split('/').pop();
-        const withdrawal = mockWithdrawals.find(w => w.tx_id === txId);
-        if (withdrawal) {
-          withdrawal.status = 'completed';
-          const user = mockUsers.find(u => u.mobile === withdrawal.sender_id.mobile);
-          if (user) {
-            user.balance -= withdrawal.amount;
-          }
-        }
-        return { status: 'success' };
-      }
-      
-      if (endpoint.includes('/admin/reject-withdraw')) {
-        const txId = endpoint.split('/').pop();
-        const idx = mockWithdrawals.findIndex(w => w.tx_id === txId);
-        if (idx !== -1) mockWithdrawals.splice(idx, 1);
-        return { status: 'success' };
-      }
-    }
-    
-    return { status: 'success' };
-  }
-  
-  // Real API call
-  try {
-    const res = await fetch(url, { headers: adminHeaders(), ...options });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch (err) {
-    console.warn(`API error ${endpoint}:`, err);
-    throw err;
-  }
-}
-
-// Auto-verify on input
-document.getElementById('pin-input').addEventListener('input', function(e) {
-  const value = e.target.value;
-  if (value.length === 4) {
-    if (value === ADMIN_KEY) doLogin();
-    else {
-      const inp = document.getElementById('pin-input');
-      inp.classList.add('shake');
-      document.getElementById('login-err').classList.add('show');
-      setTimeout(() => {
-        inp.classList.remove('shake');
-        document.getElementById('login-err').classList.remove('show');
-        inp.value = '';
-      }, 1500);
-    }
-  }
-});
-
-// Auth functions
+// ======================== AUTH ========================
 (function init() {
   const urlKey = new URLSearchParams(window.location.search).get('key');
   const sessionOk = sessionStorage.getItem('admin_ok');
@@ -819,7 +691,7 @@ function doLogout() {
   document.getElementById('pin-input').value = '';
 }
 
-// Tab management
+// ======================== TAB MANAGEMENT ========================
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', function() {
     const tabId = this.getAttribute('data-tab');
@@ -832,7 +704,45 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// Stats
+// ======================== API MOCK / REAL HANDLER ========================
+async function apiRequest(endpoint, options = {}) {
+  const url = API ? `${API}${endpoint}` : endpoint;
+  const defaultOptions = {
+    headers: adminHeaders(),
+    ...options
+  };
+  try {
+    const res = await fetch(url, defaultOptions);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn(`API error ${endpoint}:`, err);
+    // MOCK DATA for offline / demo if API is empty
+    if (!API) return mockResponse(endpoint, options);
+    throw err;
+  }
+}
+
+function mockResponse(endpoint, options) {
+  // intelligent mock data for full demo
+  if (endpoint === '/admin/stats') return { status: 'success', users: 124, transactions: 458, total_balance: 184920, api_volume: 67250 };
+  if (endpoint === '/admin/users') return { status: 'success', users: [{ _id: '1', name: 'Rajesh Kumar', mobile: '9876543210', balance: 12500 }, { _id: '2', name: 'Priya Sharma', mobile: '9988776655', balance: 3400 }, { _id: '3', name: 'Amit Verma', mobile: '9123456789', balance: 780 }] };
+  if (endpoint === '/admin/transactions') return { status: 'success', transactions: [{ _id: 'tx1', type: 'deposit', amount: 500, status: 'pending', remark: 'UTR:1234567890', receiver_id: { name: 'Rajesh', mobile: '9876543210' }, tx_time: new Date().toISOString() }, { _id: 'tx2', type: 'withdraw', amount: 200, status: 'completed', remark: 'UPI:raj@okhdfc', sender_id: { name: 'Priya', mobile: '9988776655' }, tx_time: new Date().toISOString() }] };
+  if (endpoint === '/admin/withdrawals') return { status: 'success', withdrawals: [{ _id: 'wd1', tx_id: 'W123', amount: 1500, remark: 'user@okicici', sender_id: { name: 'Amit Verma', mobile: '9123456789' }, tx_time: new Date().toISOString() }] };
+  if (options.method === 'POST' && endpoint === '/admin/add-balance') {
+    const body = JSON.parse(options.body);
+    return { status: 'success', new_balance: 15000, message: `Added ₹${body.amount}` };
+  }
+  if (options.method === 'POST' && endpoint === '/admin/deduct-balance') {
+    const body = JSON.parse(options.body);
+    return { status: 'success', new_balance: 9800, message: `Deducted ₹${body.amount}` };
+  }
+  if (options.method === 'POST' && endpoint.includes('/admin/approve-withdraw')) return { status: 'success' };
+  if (options.method === 'POST' && endpoint.includes('/admin/reject-withdraw')) return { status: 'success' };
+  return { status: 'success' };
+}
+
+// ======================== STATS ========================
 async function loadStats() {
   try {
     const data = await apiRequest('/admin/stats');
@@ -845,7 +755,7 @@ async function loadStats() {
   } catch(e) { console.error(e); }
 }
 
-// Withdrawals
+// ======================== WITHDRAWALS ========================
 async function loadWithdrawals() {
   const container = document.getElementById('withdraw-list');
   container.innerHTML = '<div class="empty"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
@@ -884,7 +794,6 @@ async function approveWithdraw(txId, docId) {
       document.getElementById(`wd-${docId}`)?.remove();
       alert('✅ Withdrawal approved successfully');
       loadStats();
-      loadUsers();
     } else alert('Error: ' + (data.message || 'Unknown'));
   } catch(e) { alert('Failed to approve'); }
 }
@@ -895,13 +804,13 @@ async function rejectWithdraw(txId, docId) {
     const data = await apiRequest(`/admin/reject-withdraw/${txId}`, { method: 'POST' });
     if (data.status === 'success') {
       document.getElementById(`wd-${docId}`)?.remove();
-      alert('❌ Withdrawal rejected');
+      alert('❌ Withdrawal rejected & refunded');
       loadStats();
     } else alert('Error: ' + (data.message || 'Unknown'));
   } catch(e) { alert('Failed to reject'); }
 }
 
-// Deposits
+// ======================== DEPOSITS (PENDING UTR) ========================
 async function loadDeposits() {
   const container = document.getElementById('deposit-list');
   container.innerHTML = '<div class="empty"><i class="fa-solid fa-spinner fa-spin"></i> Loading deposits...</div>';
@@ -941,7 +850,6 @@ async function approveDeposit(txId, mobile, amount) {
       document.getElementById(`dep-${txId}`)?.remove();
       alert(`✅ ₹${amount} added to ${mobile}`);
       loadStats();
-      loadUsers();
     } else alert('Approval failed: ' + (data.message || ''));
   } catch(e) { alert('Server error'); }
 }
@@ -952,7 +860,7 @@ async function rejectDeposit(txId) {
   alert('Deposit rejected');
 }
 
-// Add / Deduct Balance
+// ======================== ADD / DEDUCT BALANCE ========================
 function showMsg(elementId, text, type) {
   const el = document.getElementById(elementId);
   el.textContent = text;
@@ -971,9 +879,6 @@ async function addBalance() {
       document.getElementById('b-mobile').value = '';
       document.getElementById('b-amount').value = '';
       loadStats();
-      loadUsers();
-      // Also refresh withdrawals in case of any dependency
-      loadWithdrawals();
     } else showMsg('bal-msg', data.message || 'Failed', 'error');
   } catch(e) { showMsg('bal-msg', 'Server error', 'error'); }
 }
@@ -989,12 +894,11 @@ async function deductBalance() {
       document.getElementById('d-mobile').value = '';
       document.getElementById('d-amount').value = '';
       loadStats();
-      loadUsers();
     } else showMsg('ded-msg', data.message || 'Failed', 'error');
   } catch(e) { showMsg('ded-msg', 'Server error', 'error'); }
 }
 
-// Transactions & Users
+// ======================== TRANSACTIONS & USERS ========================
 async function loadTxns() {
   const container = document.getElementById('txns-list');
   container.innerHTML = '<div class="empty"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
@@ -1007,8 +911,7 @@ async function loadTxns() {
       const typeIcon = t.type === 'deposit' ? '↓' : '↑';
       const amountClass = t.type === 'deposit' ? '#10b981' : '#f97316';
       const statusBadge = t.status === 'completed' ? 'success' : (t.status === 'pending' ? 'pending' : 'failed');
-      const userInfo = t.type === 'deposit' ? (t.receiver_id?.mobile || t.receiver_id?.name || 'User') : (t.sender_id?.mobile || t.sender_id?.name || 'User');
-      html += `<div class="txn-item"><div class="txn-left"><p>${typeIcon} ${t.type === 'deposit' ? 'Deposit' : 'Withdraw'}</p><span>${userInfo} • ${new Date(t.tx_time).toLocaleString()}</span></div><div><span class="badge ${statusBadge}">${t.status}</span><div class="txn-amt" style="color:${amountClass}">₹${parseFloat(t.amount).toFixed(2)}</div></div></div>`;
+      html += `<div class="txn-item"><div class="txn-left"><p>${typeIcon} ${t.type === 'deposit' ? 'Deposit' : 'Withdraw'}</p><span>${new Date(t.tx_time).toLocaleString()}</span></div><div><span class="badge ${statusBadge}">${t.status}</span><div class="txn-amt" style="color:${amountClass}">₹${parseFloat(t.amount).toFixed(2)}</div></div></div>`;
     });
     container.innerHTML = html;
   } catch(e) { container.innerHTML = '<div class="empty">Failed to load</div>'; }
@@ -1029,9 +932,9 @@ async function loadUsers() {
   } catch(e) { container.innerHTML = '<div class="empty">Error loading users</div>'; }
 }
 
-function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
 
-// Global exports
+// Load initial stats if already visible after dashboard
 window.loadStats = loadStats;
 window.loadWithdrawals = loadWithdrawals;
 window.loadDeposits = loadDeposits;
