@@ -635,10 +635,11 @@ body {
 
 <script>
 // ======================== CONFIGURATION ========================
+// UPDATED ADMIN KEY FROM "8435" TO "2486"
+const ADMIN_KEY = '2486';
+
 // SET YOUR BACKEND API BASE URL HERE (empty = mock mode for demo)
 const API = '';   // example: 'https://your-backend.com/api' or '' for local mock
-
-const ADMIN_KEY = '8435';
 
 // Helper headers for admin requests
 function adminHeaders() {
@@ -647,6 +648,26 @@ function adminHeaders() {
     'Content-Type': 'application/json'
   };
 }
+
+// ======================== AUTO-VERIFY ON INPUT ========================
+document.getElementById('pin-input').addEventListener('input', function(e) {
+  const value = e.target.value;
+  if (value.length === 4) {
+    if (value === ADMIN_KEY) {
+      doLogin();
+    } else {
+      // auto error for wrong key
+      const inp = document.getElementById('pin-input');
+      inp.classList.add('shake');
+      document.getElementById('login-err').classList.add('show');
+      setTimeout(() => {
+        inp.classList.remove('shake');
+        document.getElementById('login-err').classList.remove('show');
+        inp.value = '';
+      }, 1500);
+    }
+  }
+});
 
 // ======================== AUTH ========================
 (function init() {
@@ -934,7 +955,7 @@ async function loadUsers() {
 
 function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
 
-// Load initial stats if already visible after dashboard
+// Expose functions globally
 window.loadStats = loadStats;
 window.loadWithdrawals = loadWithdrawals;
 window.loadDeposits = loadDeposits;
